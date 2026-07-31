@@ -376,7 +376,7 @@
 
         <!-- Waitlist form (hero). Shares behavior with the final CTA form via data-waitlist. -->
         <form class="waitlist" data-waitlist novalidate
-              action="https://formspree.io/f/REPLACE_WITH_FORM_ID" method="POST"
+              action="/api/waitlist" method="POST"
               aria-label="Join the waitlist">
           <!-- Honeypot: real users never fill this; bots often do. Hidden from everyone. -->
           <div class="sr-only" aria-hidden="true">
@@ -536,7 +536,7 @@
           <p class="lead">Join the waitlist and we'll let you know the moment we launch in your neighborhood.</p>
 
           <form class="waitlist" data-waitlist novalidate
-                action="https://formspree.io/f/REPLACE_WITH_FORM_ID" method="POST"
+                action="/api/waitlist" method="POST"
                 aria-label="Join the waitlist">
             <div class="sr-only" aria-hidden="true">
               <label>Leave this field empty<input type="text" name="_gotcha" tabindex="-1" autocomplete="off" /></label>
@@ -649,11 +649,11 @@
           button.disabled = true;
           button.textContent = "Joining…";
 
-          // ---- Submit to configured endpoint (Formspree by default) ----
-          // If the action still contains the placeholder, don't fake a network
-          // call, just confirm locally so the page is testable pre-config.
-          var endpoint = form.getAttribute("action") || "";
-          var isPlaceholder = endpoint.indexOf("REPLACE_WITH_FORM_ID") !== -1;
+          // Submit to our own /api/waitlist endpoint (see server.js), which
+          // appends the signup to a plain-text file. Sent as URL-encoded form
+          // data so the tiny Node server can parse it without any libraries.
+          var endpoint = form.getAttribute("action") || "/api/waitlist";
+          var payload = new URLSearchParams(new FormData(form)).toString();
 
           function onSuccess() {
             form.reset();
@@ -667,22 +667,17 @@
             button.textContent = originalLabel;
           }
 
-          if (isPlaceholder) {
-            // Local/demo mode until you set a real endpoint (see README).
-            setTimeout(function () { onSuccess(); done(); }, 500);
-            return;
-          }
-
           fetch(endpoint, {
             method: "POST",
-            body: new FormData(form),
-            headers: { "Accept": "application/json" }
+            body: payload,
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+              "Accept": "application/json"
+            }
           })
             .then(function (res) {
               if (res.ok) { onSuccess(); }
-              else { res.json().then(function (d) {
-                onError(); void d;
-              }).catch(onError); }
+              else { onError(); }
             })
             .catch(onError)
             .finally(done);
@@ -692,19 +687,11 @@
   </script>
 
   <!-- ============================================================
-       ALTERNATIVE: Netlify Forms (if you deploy on Netlify)
-       Netlify detects forms at build/deploy time from static HTML.
-       To use it instead of Formspree:
-         1. On ONE of the <form> tags above, add:
-              data-netlify="true" netlify-honeypot="_gotcha" name="waitlist"
-            and remove the Formspree action="" (or leave it, Netlify ignores it
-            when data-netlify is present and JS falls back to a native POST to "/").
-         2. Add a hidden input as the first child of that form:
-              <input type="hidden" name="form-name" value="waitlist" />
-         3. Netlify needs to see the form markup at deploy time, so keep it in
-            the static HTML (it already is). Submissions appear in the Netlify
-            dashboard under Forms.
-       See README.md for full steps.
+       Where do the emails go?
+       Both forms POST to /api/waitlist, handled by server.js, which appends
+       each signup as one line to a plain-text file (data/waitlist.csv).
+       No database and no third-party service. See README.md for how to run
+       it locally and how to keep the file from being wiped on Railway.
   ============================================================ -->
 </body>
 </html>

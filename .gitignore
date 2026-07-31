@@ -1,2 +1,5 @@
 node_modules/
 .DS_Store
+
+# Collected waitlist emails — never commit these.
+data/
