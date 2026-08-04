@@ -107,7 +107,7 @@ to a writable, persistent path.
 - **Colors / fonts** live in the `:root` CSS variables at the top of `index.html`.
 - **Logo + favicon** are the same inline SVG (an "a" monogram + terracotta heart),
   defined once in the header and once as a data-URI favicon in `<head>`.
-- **Copy** for the four care levels is in the "How it works" section.
+- **Copy** for the three care levels is in the "How it works" section.
 - The waitlist fields are `email` (required), `zip` (optional), and a hidden `_gotcha`
   honeypot for spam. To capture more fields, add the input to both forms and add the
   column in `server.js`.

@@ -9,15 +9,15 @@
        - Update the OG/Twitter image path once you add /og-image.png
          (see README). 1200x630 recommended.
   ============================================================ -->
-  <title>Amia Vet: Expert pet care, from a quick question to a house call (coming soon)</title>
-  <meta name="description" content="Amia Vet is a new, AI-first way to care for your pet in San Diego: start with a free AI consult, get a licensed vet's review, book a video visit, or have a vet come to your door. Join the waitlist." />
+  <title>Amia Vet: Expert pet care, from a quick question to a vet on video (coming soon)</title>
+  <meta name="description" content="Amia Vet is a new, AI-first way to care for your pet in San Diego: start with a free AI consult, add a licensed vet's review, or book a video visit with a California-licensed vet. Join the waitlist." />
   <link rel="canonical" href="https://amiavet.com/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Amia Vet" />
-  <meta property="og:title" content="Amia Vet: Expert pet care, from a quick question to a house call" />
-  <meta property="og:description" content="A new, AI-first way to care for your pet in San Diego. Free AI consult, licensed vet review, video visits, and house calls, all in one place. Join the waitlist." />
+  <meta property="og:title" content="Amia Vet: Expert pet care, from a quick question to a vet on video" />
+  <meta property="og:description" content="A new, AI-first way to care for your pet in San Diego. Free AI consult, licensed vet review, and video visits, all in one place. Join the waitlist." />
   <meta property="og:url" content="https://amiavet.com/" />
   <meta property="og:image" content="/og-image.png" />
   <meta property="og:image:width" content="1200" />
@@ -25,7 +25,7 @@
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Amia Vet: Expert pet care, from a quick question to a house call" />
+  <meta name="twitter:title" content="Amia Vet: Expert pet care, from a quick question to a vet on video" />
   <meta name="twitter:description" content="A new, AI-first way to care for your pet in San Diego. Join the waitlist to be the first to know when we launch." />
   <meta name="twitter:image" content="/og-image.png" />
 
@@ -234,10 +234,9 @@
     ============================================================ */
     .steps {
       display: grid; gap: 20px;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
     }
-    @media (max-width: 900px) { .steps { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
 
     .card {
       position: relative;
@@ -267,6 +266,22 @@
       padding: 6px 12px; border-radius: var(--radius-pill);
     }
     .price-signal.premium { color: var(--terracotta); background: var(--terracotta-soft); }
+
+    /* In-person referral note (v1 is online only) */
+    .referral {
+      display: flex; align-items: flex-start; gap: 18px;
+      margin-top: 24px; padding: 22px 24px;
+      background: var(--terracotta-soft);
+      border: 1px solid rgba(194,65,12,.18);
+      border-radius: var(--radius-lg);
+    }
+    .referral-icon {
+      flex: none; width: 46px; height: 46px; border-radius: 12px;
+      background: #fff; color: var(--terracotta);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .referral h3 { font-size: 1.08rem; margin-bottom: 4px; color: var(--charcoal); }
+    .referral p { color: var(--muted); font-size: .96rem; }
 
     .ladder-note {
       text-align: center; margin-top: 28px; color: var(--muted);
@@ -367,11 +382,11 @@
       <div class="wrap hero-inner">
         <span class="eyebrow">A new kind of pet care</span>
         <h1 id="hero-title">
-          Expert care for your pet, from a quick question to a <span class="accent">house call.</span>
+          Expert care for your pet, from a quick question to a <span class="accent">vet on video.</span>
         </h1>
         <p class="subhead">
           Amia Vet is a new, AI-first way to care for your pet: start with a free AI consult,
-          get a licensed vet's review, book a video visit, or have a vet come to your door, all in one place.
+          add a licensed vet's review, or book a video visit with a California-licensed veterinarian, all in one place.
         </p>
 
         <!-- Waitlist form (hero). Shares behavior with the final CTA form via data-waitlist. -->
@@ -409,7 +424,7 @@
     <section id="how" aria-labelledby="how-title">
       <div class="wrap">
         <div class="section-head">
-          <h2 id="how-title">One place, four levels of care</h2>
+          <h2 id="how-title">One place, three levels of care</h2>
           <p>Start small and go only as far as your pet needs. Each step builds on the last.</p>
         </div>
 
@@ -451,25 +466,26 @@
                 <path d="M15 10l6-3v10l-6-3z"/>
               </svg>
             </span>
-            <h3>Video visit</h3>
-            <p>Book a video call with a California-licensed veterinarian.</p>
+            <h3>15-minute video visit</h3>
+            <p>Book a live video call with a California-licensed veterinarian.</p>
             <span class="price-signal">Affordable</span>
           </article>
+        </div>
 
-          <!-- 4. House call -->
-          <article class="card">
-            <span class="step-num">04</span>
-            <span class="icon-badge" aria-hidden="true">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 11l8-6 8 6"/>
-                <path d="M6 10v9h12v-9"/>
-                <path d="M10.5 15.2c0-.9.7-1.5 1.5-1.5s1.5.6 1.5 1.5c0 1-1.5 2-1.5 2s-1.5-1-1.5-2z"/>
-              </svg>
-            </span>
-            <h3>House call</h3>
-            <p>A vet comes to your home for hands-on care.</p>
-            <span class="price-signal premium">Premium</span>
-          </article>
+        <!-- In-person referral: v1 is online only. If a pet needs hands-on care,
+             we point owners to an in-person vet instead of offering it ourselves. -->
+        <div class="referral" role="note">
+          <span class="referral-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 21c4-4 7-7.3 7-11a7 7 0 10-14 0c0 3.7 3 7 7 11z"/>
+              <circle cx="12" cy="10" r="2.5"/>
+            </svg>
+          </span>
+          <div>
+            <h3>Need to be seen in person?</h3>
+            <p>If our vets determine your pet should be examined hands-on, we'll help you get there,
+               with your regular veterinarian or a trusted local clinic we recommend.</p>
+          </div>
         </div>
 
         <p class="ladder-note">No memberships, no waiting rooms, just the right level of care when you need it.</p>
@@ -486,8 +502,8 @@
         </div>
 
         <p class="why-lead">
-          From the team behind <strong>VetPronto</strong>, once the largest house-call
-          veterinary service in the country.
+          From the team behind <strong>VetPronto</strong>, a pioneer in convenient,
+          tech-first veterinary care.
         </p>
 
         <div class="reasons">
@@ -509,7 +525,7 @@
               </svg>
             </span>
             <h3>Care that meets you where you are</h3>
-            <p>From a quick question to your front door, you choose how far to go.</p>
+            <p>From a quick question to a video visit, you choose how far to go.</p>
           </div>
 
           <div class="reason">
