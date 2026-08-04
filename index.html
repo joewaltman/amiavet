@@ -6,18 +6,17 @@
 
   <!-- ============================================================
        SEO / social sharing
-       - Update the OG/Twitter image path once you add /og-image.png
-         (see README). 1200x630 recommended.
+       Update the OG/Twitter image path once you add /og-image.png (see README).
   ============================================================ -->
-  <title>Amia Vet: Expert pet care, from a quick question to a vet on video (coming soon)</title>
-  <meta name="description" content="Amia Vet is a new, AI-first way to care for your pet in San Diego: start with a free AI consult, add a licensed vet's review, or book a video visit with a California-licensed vet. Join the waitlist." />
+  <title>Amia Vet: Start with a smart answer, get a real vet when you need one (coming soon)</title>
+  <meta name="description" content="Amia Vet gives you instant AI guidance for your pet, clearly labeled as AI, with a California-licensed veterinarian one click away to review it for $20 or meet you on a 15-minute video call for $40. Join the waitlist." />
   <link rel="canonical" href="https://amiavet.com/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Amia Vet" />
-  <meta property="og:title" content="Amia Vet: Expert pet care, from a quick question to a vet on video" />
-  <meta property="og:description" content="A new, AI-first way to care for your pet in San Diego. Free AI consult, licensed vet review, and video visits, all in one place. Join the waitlist." />
+  <meta property="og:title" content="Amia Vet: Start with a smart answer. Get a real vet when you need one." />
+  <meta property="og:description" content="Instant AI guidance for your pet, clearly labeled as AI, with a California-licensed veterinarian one click away. Join the waitlist." />
   <meta property="og:url" content="https://amiavet.com/" />
   <meta property="og:image" content="/og-image.png" />
   <meta property="og:image:width" content="1200" />
@@ -25,19 +24,18 @@
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Amia Vet: Expert pet care, from a quick question to a vet on video" />
-  <meta name="twitter:description" content="A new, AI-first way to care for your pet in San Diego. Join the waitlist to be the first to know when we launch." />
+  <meta name="twitter:title" content="Amia Vet: Start with a smart answer. Get a real vet when you need one." />
+  <meta name="twitter:description" content="Instant AI guidance for your pet, clearly labeled as AI, with a California-licensed veterinarian one click away. Join the waitlist." />
   <meta name="twitter:image" content="/og-image.png" />
 
   <meta name="theme-color" content="#1F6F5C" />
 
   <!-- ============================================================
        Favicon: inline SVG "a" monogram + heart mark (matches header logo).
-       Data-URI so there are zero extra files to host.
   ============================================================ -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231F6F5C'/%3E%3Cpath d='M20.5 10.5v11M20.5 13.2c-1-1.9-2.9-3-5-3a5.3 5.3 0 100 10.6c2.1 0 4-1.1 5-3' fill='none' stroke='%23FBF9F4' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M24.6 20.2c.9-.8 1.5-1.6 1.5-2.5a1.5 1.5 0 00-2.7-.9 1.5 1.5 0 00-2.7.9c0 .9.6 1.7 1.5 2.5l1.2 1z' fill='%23C2410C'/%3E%3C/svg%3E" />
 
-  <!-- Fonts: Inter (friendly humanist sans). Falls back to a system stack if blocked. -->
+  <!-- Fonts: Inter (friendly humanist sans), with a system fallback if blocked. -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -47,17 +45,17 @@
        Design tokens
     ============================================================ */
     :root {
-      --green:        #1F6F5C;  /* primary deep sage/teal */
-      --green-dark:   #175646;  /* hover / darker text on cream */
-      --green-soft:   #E7F0EC;  /* tinted surfaces */
-      --cream:        #FBF9F4;  /* page background */
-      --card:         #FFFFFF;  /* card surface */
-      --charcoal:     #1A1A2E;  /* primary text */
-      --muted:        #55566A;  /* secondary text (AA on cream) */
-      --terracotta:   #C2410C;  /* sparing accent */
+      --green:        #1F6F5C;
+      --green-dark:   #175646;
+      --green-soft:   #E7F0EC;
+      --cream:        #FBF9F4;
+      --card:         #FFFFFF;
+      --charcoal:     #1A1A2E;
+      --muted:        #55566A;
+      --terracotta:   #C2410C;
       --terracotta-soft: #FBEDE4;
-      --border:       #ECE7DD;  /* hairlines on cream */
-      --ring:         #1F6F5C;  /* focus ring */
+      --border:       #ECE7DD;
+      --ring:         #1F6F5C;
 
       --radius-sm: 10px;
       --radius:    16px;
@@ -100,11 +98,7 @@
       border-radius: var(--radius-sm); z-index: 100; transition: top .15s ease;
     }
     .skip-link:focus { top: 12px; }
-    :focus-visible {
-      outline: 3px solid var(--ring);
-      outline-offset: 2px;
-      border-radius: 6px;
-    }
+    :focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; border-radius: 6px; }
 
     /* ============================================================
        Header
@@ -122,25 +116,17 @@
     }
     .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
     .brand-mark { flex: none; }
-    .brand-name {
-      font-weight: 800; font-size: 1.28rem; color: var(--charcoal);
-      letter-spacing: -0.02em;
-    }
+    .brand-name { font-weight: 800; font-size: 1.28rem; color: var(--charcoal); letter-spacing: -0.02em; }
     .pill {
       display: inline-flex; align-items: center; gap: 8px;
       font-size: .82rem; font-weight: 600; color: var(--green-dark);
-      background: var(--green-soft);
-      border: 1px solid rgba(31,111,92,.16);
-      padding: 7px 14px; border-radius: var(--radius-pill);
-      white-space: nowrap;
+      background: var(--green-soft); border: 1px solid rgba(31,111,92,.16);
+      padding: 7px 14px; border-radius: var(--radius-pill); white-space: nowrap;
     }
-    .pill .dot {
-      width: 8px; height: 8px; border-radius: 50%; background: var(--green);
-      box-shadow: 0 0 0 4px rgba(31,111,92,.14);
-    }
+    .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(31,111,92,.14); }
 
     /* ============================================================
-       Buttons + form controls (shared)
+       Buttons + form controls
     ============================================================ */
     .btn {
       appearance: none; cursor: pointer; border: 0;
@@ -158,27 +144,20 @@
     .field {
       font-family: inherit; font-size: 1rem; color: var(--charcoal);
       background: #fff; border: 1.5px solid var(--border);
-      padding: 15px 16px; border-radius: var(--radius);
-      width: 100%; transition: border-color .15s ease, box-shadow .15s ease;
+      padding: 15px 16px; border-radius: var(--radius); width: 100%;
+      transition: border-color .15s ease, box-shadow .15s ease;
     }
     .field::placeholder { color: #9a9aab; }
-    .field:focus-visible {
-      outline: none; border-color: var(--green);
-      box-shadow: 0 0 0 4px rgba(31,111,92,.15);
-    }
+    .field:focus-visible { outline: none; border-color: var(--green); box-shadow: 0 0 0 4px rgba(31,111,92,.15); }
 
-    /* Visually-hidden (labels for screen readers, honeypot) */
     .sr-only {
       position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
       overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
     }
 
-    /* Waitlist form layout */
+    /* Waitlist form */
     .waitlist { width: 100%; }
-    .waitlist-row {
-      display: grid; gap: 12px;
-      grid-template-columns: 1fr auto;
-    }
+    .waitlist-row { display: grid; gap: 12px; grid-template-columns: 1fr auto; }
     .waitlist-row .zip { max-width: 130px; }
     @media (max-width: 560px) {
       .waitlist-row { grid-template-columns: 1fr; }
@@ -186,10 +165,7 @@
       .btn { width: 100%; }
     }
     .microcopy { margin-top: 12px; font-size: .88rem; color: var(--muted); }
-    .form-status {
-      margin-top: 14px; font-size: .95rem; font-weight: 600;
-      display: none; padding: 12px 16px; border-radius: var(--radius-sm);
-    }
+    .form-status { margin-top: 14px; font-size: .95rem; font-weight: 600; display: none; padding: 12px 16px; border-radius: var(--radius-sm); }
     .form-status.show { display: block; }
     .form-status.success { color: var(--green-dark); background: var(--green-soft); }
     .form-status.error { color: var(--terracotta); background: var(--terracotta-soft); }
@@ -204,110 +180,109 @@
         radial-gradient(60% 55% at 85% 0%, rgba(31,111,92,.10), transparent 60%),
         radial-gradient(50% 50% at 5% 30%, rgba(194,65,12,.06), transparent 60%);
     }
-    .hero-inner { padding: 72px 0 64px; max-width: 780px; }
+    .hero-inner { padding: 72px 0 56px; max-width: 800px; }
     .eyebrow {
       display: inline-block; font-weight: 700; font-size: .85rem;
-      letter-spacing: .06em; text-transform: uppercase;
-      color: var(--terracotta); margin-bottom: 18px;
+      letter-spacing: .06em; text-transform: uppercase; color: var(--terracotta); margin-bottom: 18px;
     }
-    .hero h1 {
-      font-size: clamp(2.1rem, 5.4vw, 3.5rem);
-      font-weight: 800; color: var(--charcoal); margin-bottom: 20px;
-    }
+    .hero h1 { font-size: clamp(2.1rem, 5.4vw, 3.4rem); font-weight: 800; color: var(--charcoal); margin-bottom: 20px; }
     .hero h1 .accent { color: var(--green); }
-    .hero .subhead {
-      font-size: clamp(1.05rem, 2.3vw, 1.28rem);
-      color: var(--muted); max-width: 640px; margin-bottom: 32px;
-    }
+    .hero .subhead { font-size: clamp(1.05rem, 2.3vw, 1.24rem); color: var(--muted); max-width: 680px; margin-bottom: 32px; }
     .hero .waitlist { max-width: 560px; }
+
+    /* "Why not just ask a chatbot yourself?" note */
+    .chatbot-note {
+      display: flex; align-items: flex-start; gap: 16px;
+      max-width: 720px; margin: 8px 0 4px;
+      background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 22px 24px; box-shadow: var(--shadow-sm);
+    }
+    .chatbot-note .icon-badge { flex: none; }
+    .chatbot-note h3 { font-size: 1.05rem; margin-bottom: 6px; }
+    .chatbot-note p { color: var(--muted); font-size: .98rem; }
 
     /* ============================================================
        Section shells
     ============================================================ */
-    section { padding: 72px 0; }
-    .section-head { max-width: 640px; margin: 0 auto 44px; text-align: center; }
+    section { padding: 68px 0; }
+    .section-head { max-width: 660px; margin: 0 auto 44px; text-align: center; }
     .section-head h2 { font-size: clamp(1.7rem, 3.6vw, 2.4rem); margin-bottom: 14px; }
     .section-head p { color: var(--muted); font-size: 1.08rem; }
 
-    /* ============================================================
-       How it works: escalation ladder of 4 cards
-    ============================================================ */
-    .steps {
-      display: grid; gap: 20px;
-      grid-template-columns: repeat(3, 1fr);
-    }
-    @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
-
-    .card {
-      position: relative;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 26px 24px;
-      box-shadow: var(--shadow-sm);
-      transition: transform .18s ease, box-shadow .18s ease;
-      display: flex; flex-direction: column;
-    }
-    .card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
-    .step-num {
-      position: absolute; top: 18px; right: 20px;
-      font-size: .8rem; font-weight: 700; color: #C6C2B6;
-    }
     .icon-badge {
       width: 52px; height: 52px; border-radius: 14px;
       background: var(--green-soft); color: var(--green);
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 18px;
-    }
-    .card h3 { font-size: 1.16rem; margin-bottom: 8px; }
-    .card p { color: var(--muted); font-size: .96rem; flex: 1; }
-    .price-signal {
-      display: inline-flex; align-self: flex-start; margin-top: 18px;
-      font-size: .8rem; font-weight: 700; letter-spacing: .02em;
-      color: var(--green-dark); background: var(--green-soft);
-      padding: 6px 12px; border-radius: var(--radius-pill);
-    }
-    .price-signal.premium { color: var(--terracotta); background: var(--terracotta-soft); }
-
-    /* In-person referral note (v1 is online only) */
-    .referral {
-      display: flex; align-items: flex-start; gap: 18px;
-      margin-top: 24px; padding: 22px 24px;
-      background: var(--terracotta-soft);
-      border: 1px solid rgba(194,65,12,.18);
-      border-radius: var(--radius-lg);
-    }
-    .referral-icon {
-      flex: none; width: 46px; height: 46px; border-radius: 12px;
-      background: #fff; color: var(--terracotta);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .referral h3 { font-size: 1.08rem; margin-bottom: 4px; color: var(--charcoal); }
-    .referral p { color: var(--muted); font-size: .96rem; }
-
-    .ladder-note {
-      text-align: center; margin-top: 28px; color: var(--muted);
-      font-size: .95rem;
     }
 
     /* ============================================================
-       Why Amia: credibility band
+       How it works: 3 process steps
     ============================================================ */
-    .why { background: var(--green); color: #fff; }
-    .why .section-head h2 { color: #fff; }
-    .why-lead {
-      max-width: 720px; margin: 0 auto 40px; text-align: center;
-      font-size: clamp(1.25rem, 3vw, 1.7rem); font-weight: 600;
-      color: #fff; line-height: 1.35;
+    .process { display: grid; gap: 22px; grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 760px) { .process { grid-template-columns: 1fr; } }
+    .step {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 28px 26px; box-shadow: var(--shadow-sm);
     }
-    .why-lead strong { color: #FFE9DC; font-weight: 700; }
-    .reasons {
-      display: grid; gap: 20px; grid-template-columns: repeat(3, 1fr);
-      max-width: 900px; margin: 0 auto;
+    .step-num {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--green); color: #fff; font-weight: 800; font-size: 1.05rem;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 18px;
     }
+    .step h3 { font-size: 1.16rem; margin-bottom: 8px; }
+    .step p { color: var(--muted); font-size: .98rem; }
+    .step .ai-tag { color: var(--terracotta); font-weight: 600; }
+
+    /* ============================================================
+       Pricing tiers
+    ============================================================ */
+    .tiers { display: grid; gap: 22px; grid-template-columns: repeat(3, 1fr); align-items: stretch; }
+    @media (max-width: 760px) { .tiers { grid-template-columns: 1fr; } }
+    .tier {
+      position: relative; display: flex; flex-direction: column;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 28px 26px; box-shadow: var(--shadow-sm);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .tier:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+    .tier.featured { border-color: rgba(31,111,92,.45); box-shadow: var(--shadow); }
+    .tier-eyebrow { font-size: .8rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .tier h3 { font-size: 1.2rem; margin-bottom: 6px; }
+    .tier-price { font-size: 2.4rem; font-weight: 800; color: var(--green); letter-spacing: -0.03em; line-height: 1.1; margin: 6px 0 14px; }
+    .tier-price .cadence { display: block; font-size: .82rem; font-weight: 600; color: var(--muted); letter-spacing: 0; text-transform: none; margin-top: 4px; }
+    .tier p { color: var(--muted); font-size: .96rem; flex: 1; }
+    .tag {
+      display: inline-flex; align-self: flex-start; margin-bottom: 14px;
+      font-size: .74rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
+      padding: 5px 10px; border-radius: var(--radius-pill);
+    }
+    .tag.ai { color: var(--terracotta); background: var(--terracotta-soft); }
+    .tag.vet { color: var(--green-dark); background: var(--green-soft); }
+
+    .transparency {
+      max-width: 720px; margin: 30px auto 0; text-align: center;
+      color: var(--muted); font-size: 1rem;
+    }
+    .disclaimer-note {
+      max-width: 760px; margin: 22px auto 0;
+      background: var(--terracotta-soft); border: 1px solid rgba(194,65,12,.18);
+      border-radius: var(--radius); padding: 16px 20px;
+      color: #7a2c08; font-size: .9rem; text-align: center;
+    }
+
+    /* ============================================================
+       Trust band
+    ============================================================ */
+    .trust { background: var(--green); color: #fff; }
+    .trust .section-head h2 { color: #fff; }
+    .trust-lead {
+      max-width: 760px; margin: 0 auto 36px; text-align: center;
+      font-size: clamp(1.15rem, 2.6vw, 1.5rem); font-weight: 600; color: #fff; line-height: 1.4;
+    }
+    .trust-lead .hl { color: #FFE9DC; }
+    .reasons { display: grid; gap: 20px; grid-template-columns: repeat(3, 1fr); max-width: 940px; margin: 0 auto; }
     @media (max-width: 760px) { .reasons { grid-template-columns: 1fr; } }
-    .reason {
-      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16);
-      border-radius: var(--radius); padding: 22px 22px;
-    }
+    .reason { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); border-radius: var(--radius); padding: 22px; }
     .reason .icon-badge { background: rgba(255,255,255,.14); color: #fff; margin-bottom: 14px; }
     .reason h3 { color: #fff; font-size: 1.05rem; margin-bottom: 6px; }
     .reason p { color: rgba(255,255,255,.85); font-size: .94rem; }
@@ -329,19 +304,13 @@
        Footer
     ============================================================ */
     footer { border-top: 1px solid var(--border); padding: 44px 0 56px; }
-    .footer-inner { display: flex; flex-direction: column; gap: 20px; }
-    .footer-top {
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 16px;
-    }
+    .footer-inner { display: flex; flex-direction: column; gap: 18px; }
+    .footer-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
     .footer-links { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
     .footer-links a { color: var(--muted); text-decoration: none; font-size: .92rem; font-weight: 500; }
     .footer-links a:hover { color: var(--green-dark); }
-    .disclaimer {
-      color: var(--muted); font-size: .86rem; max-width: 760px;
-      border-top: 1px dashed var(--border); padding-top: 20px;
-    }
-    .disclaimer strong { color: var(--charcoal); }
+    .fine-print { color: var(--muted); font-size: .86rem; max-width: 820px; border-top: 1px dashed var(--border); padding-top: 20px; display: grid; gap: 10px; }
+    .fine-print strong { color: var(--charcoal); }
     .copyright { color: #9a9aab; font-size: .84rem; }
 
     @media (prefers-reduced-motion: reduce) {
@@ -382,11 +351,12 @@
       <div class="wrap hero-inner">
         <span class="eyebrow">A new kind of pet care</span>
         <h1 id="hero-title">
-          Expert care for your pet, from a quick question to a <span class="accent">vet on video.</span>
+          Start with a smart answer. <span class="accent">Get a real vet when you need one.</span>
         </h1>
         <p class="subhead">
-          Amia Vet is a new, AI-first way to care for your pet: start with a free AI consult,
-          add a licensed vet's review, or book a video visit with a California-licensed veterinarian, all in one place.
+          Answer a few quick questions and get instant AI guidance for your pet, clearly labeled as AI.
+          Want a professional? A California-licensed veterinarian will review it or meet you on a
+          15-minute video call, and tell you honestly if your pet needs to be seen in person.
         </p>
 
         <!-- Waitlist form (hero). Shares behavior with the final CTA form via data-waitlist. -->
@@ -402,108 +372,142 @@
             <div>
               <label class="sr-only" for="hero-email">Email address</label>
               <input class="field" id="hero-email" type="email" name="email"
-                     inputmode="email" autocomplete="email" required
-                     placeholder="you@email.com" />
+                     inputmode="email" autocomplete="email" required placeholder="you@email.com" />
             </div>
             <label class="sr-only" for="hero-zip">Zip code (optional)</label>
             <input class="field zip" id="hero-zip" type="text" name="zip"
-                   inputmode="numeric" autocomplete="postal-code" maxlength="10"
-                   placeholder="Zip (optional)" />
+                   inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="Zip (optional)" />
             <button class="btn" type="submit">Join the waitlist</button>
           </div>
 
-          <p class="microcopy">Free to join. No spam, just one note when we launch in your neighborhood.</p>
+          <p class="microcopy">Free to join. No spam, just one note when we launch.</p>
           <p class="form-status" role="status" aria-live="polite"></p>
         </form>
       </div>
     </section>
 
     <!-- ============================================================
-         HOW IT WORKS: escalation ladder
+         WHY NOT JUST ASK A CHATBOT YOURSELF?
     ============================================================ -->
-    <section id="how" aria-labelledby="how-title">
+    <section style="padding-top: 0;" aria-labelledby="chatbot-title">
       <div class="wrap">
-        <div class="section-head">
-          <h2 id="how-title">One place, three levels of care</h2>
-          <p>Start small and go only as far as your pet needs. Each step builds on the last.</p>
-        </div>
-
-        <div class="steps">
-          <!-- 1. Free AI consult -->
-          <article class="card">
-            <span class="step-num">01</span>
-            <span class="icon-badge" aria-hidden="true">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 11.5a8.5 8.5 0 01-11.9 7.8L3 21l1.7-6.1A8.5 8.5 0 1121 11.5z"/>
-                <path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>
-              </svg>
-            </span>
-            <h3>Free AI consult</h3>
-            <p>Ask about your pet and get instant, helpful guidance.</p>
-            <span class="price-signal">Free</span>
-          </article>
-
-          <!-- 2. Vet-reviewed answer -->
-          <article class="card">
-            <span class="step-num">02</span>
-            <span class="icon-badge" aria-hidden="true">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/>
-                <path d="M9 11.5l2 2 4-4.5"/>
-              </svg>
-            </span>
-            <h3>Vet-reviewed answer</h3>
-            <p>A licensed veterinarian reviews and enhances your answer.</p>
-            <span class="price-signal">Low cost</span>
-          </article>
-
-          <!-- 3. Video visit -->
-          <article class="card">
-            <span class="step-num">03</span>
-            <span class="icon-badge" aria-hidden="true">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="6" width="12" height="12" rx="2.5"/>
-                <path d="M15 10l6-3v10l-6-3z"/>
-              </svg>
-            </span>
-            <h3>15-minute video visit</h3>
-            <p>Book a live video call with a California-licensed veterinarian.</p>
-            <span class="price-signal">Affordable</span>
-          </article>
-        </div>
-
-        <!-- In-person referral: v1 is online only. If a pet needs hands-on care,
-             we point owners to an in-person vet instead of offering it ourselves. -->
-        <div class="referral" role="note">
-          <span class="referral-icon" aria-hidden="true">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 21c4-4 7-7.3 7-11a7 7 0 10-14 0c0 3.7 3 7 7 11z"/>
-              <circle cx="12" cy="10" r="2.5"/>
+        <div class="chatbot-note">
+          <span class="icon-badge" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 11.5a8.5 8.5 0 01-11.9 7.8L3 21l1.7-6.1A8.5 8.5 0 1121 11.5z"/>
+              <path d="M12 8v4M12 15h.01"/>
             </svg>
           </span>
           <div>
-            <h3>Need to be seen in person?</h3>
-            <p>If our vets determine your pet should be examined hands-on, we'll help you get there,
-               with your regular veterinarian or a trusted local clinic we recommend.</p>
+            <h3 id="chatbot-title">Why not just ask a chatbot yourself?</h3>
+            <p>Generic answers can scare you or miss things. Amia asks the right questions for a focused
+               answer, and puts a licensed veterinarian one click away.</p>
           </div>
         </div>
-
-        <p class="ladder-note">No memberships, no waiting rooms, just the right level of care when you need it.</p>
       </div>
     </section>
 
     <!-- ============================================================
-         WHY AMIA: credibility band
+         HOW IT WORKS: 3 process steps
     ============================================================ -->
-    <section class="why" aria-labelledby="why-title">
+    <section id="how" aria-labelledby="how-title">
       <div class="wrap">
         <div class="section-head">
-          <h2 id="why-title">Why Amia</h2>
+          <h2 id="how-title">How it works</h2>
+          <p>Start free in seconds. Bring in a licensed veterinarian only if you want one.</p>
         </div>
 
-        <p class="why-lead">
-          From the team behind <strong>VetPronto</strong>, a pioneer in convenient,
-          tech-first veterinary care.
+        <div class="process">
+          <article class="step">
+            <div class="step-num" aria-hidden="true">1</div>
+            <h3>Tell us what's going on</h3>
+            <p>Answer a few guided questions about your pet.</p>
+          </article>
+
+          <article class="step">
+            <div class="step-num" aria-hidden="true">2</div>
+            <h3>Get an instant answer</h3>
+            <p>Our AI gives you a focused first look, clearly labeled as AI.
+               <span class="ai-tag">Not a vet, and not medical advice.</span></p>
+          </article>
+
+          <article class="step">
+            <div class="step-num" aria-hidden="true">3</div>
+            <h3>Bring in a vet if you want one</h3>
+            <p>A California-licensed veterinarian can review your answer for $20, or meet you on a
+               15-minute video call for $40, and will tell you honestly if your pet should be seen in person.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PRICING TIERS
+    ============================================================ -->
+    <section id="pricing" style="padding-top: 0;" aria-labelledby="pricing-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="pricing-title">Simple, upfront pricing</h2>
+          <p>Three ways to get help, so you only pay when you want a professional.</p>
+        </div>
+
+        <div class="tiers">
+          <!-- Tier 1: Ask Amia (Free, AI) -->
+          <article class="tier">
+            <span class="tier-eyebrow">Start here</span>
+            <span class="tag ai">AI, not a vet</span>
+            <h3>Ask Amia</h3>
+            <div class="tier-price">Free</div>
+            <p>An instant, AI-generated answer to your pet question. A smart first look, clearly labeled as AI.
+               Not reviewed by a vet, and not veterinary advice.</p>
+          </article>
+
+          <!-- Tier 2: Vet-reviewed answer ($20) -->
+          <article class="tier featured">
+            <span class="tier-eyebrow">Most popular</span>
+            <span class="tag vet">Licensed vet</span>
+            <h3>Vet-reviewed answer</h3>
+            <div class="tier-price">$20</div>
+            <p>A California-licensed veterinarian reviews the AI's answer, corrects anything off,
+               and adds their own guidance.</p>
+          </article>
+
+          <!-- Tier 3: 15-minute video visit ($40) -->
+          <article class="tier">
+            <span class="tier-eyebrow">Talk to a vet</span>
+            <span class="tag vet">Licensed vet</span>
+            <h3>15-minute video visit</h3>
+            <div class="tier-price">$40</div>
+            <p>A live video call with a California-licensed veterinarian. Honest guidance, including whether
+               your pet needs an in-person visit, and help finding a clinic if so.</p>
+          </article>
+        </div>
+
+        <p class="transparency">
+          We're upfront about what's AI and what's a vet. You always know who, or what, is answering,
+          and a licensed veterinarian is always one click away.
+        </p>
+
+        <!-- AI disclaimer, placed near the free tier -->
+        <p class="disclaimer-note">
+          AI guidance is for information only, is not a substitute for professional veterinary care,
+          and does not create a veterinarian-client-patient relationship.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         TRUST BAND
+    ============================================================ -->
+    <section class="trust" aria-labelledby="trust-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="trust-title">Real vets when it counts</h2>
+        </div>
+
+        <p class="trust-lead">
+          Vet-reviewed answers and video visits are handled by <span class="hl">California-licensed
+          veterinarians</span>. The first answer is AI-generated and clearly labeled.
         </p>
 
         <div class="reasons">
@@ -515,17 +519,17 @@
               </svg>
             </span>
             <h3>Licensed California vets</h3>
-            <p>Every visit and review is handled by veterinarians licensed in California.</p>
+            <p>Vet-reviewed answers and video visits are handled by veterinarians licensed in California.</p>
           </div>
 
           <div class="reason">
             <span class="icon-badge" aria-hidden="true">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 21s-7-4.6-7-10a4 4 0 017-2.6A4 4 0 0119 11c0 5.4-7 10-7 10z"/>
+                <path d="M13 2L4.5 13H12l-1 9 8.5-11H12l1-9z"/>
               </svg>
             </span>
-            <h3>Care that meets you where you are</h3>
-            <p>From a quick question to a video visit, you choose how far to go.</p>
+            <h3>Built by veterinary pioneers</h3>
+            <p>From the team behind VetPronto, a pioneer in convenient, tech-first veterinary care.</p>
           </div>
 
           <div class="reason">
@@ -536,7 +540,7 @@
               </svg>
             </span>
             <h3>Proudly San Diego local</h3>
-            <p>Built for San Diego and North County neighborhoods, launching soon.</p>
+            <p>Built for San Diego pet owners, with California-licensed vets, launching soon.</p>
           </div>
         </div>
       </div>
@@ -562,17 +566,15 @@
               <div>
                 <label class="sr-only" for="final-email">Email address</label>
                 <input class="field" id="final-email" type="email" name="email"
-                       inputmode="email" autocomplete="email" required
-                       placeholder="you@email.com" />
+                       inputmode="email" autocomplete="email" required placeholder="you@email.com" />
               </div>
               <label class="sr-only" for="final-zip">Zip code (optional)</label>
               <input class="field zip" id="final-zip" type="text" name="zip"
-                     inputmode="numeric" autocomplete="postal-code" maxlength="10"
-                     placeholder="Zip (optional)" />
+                     inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="Zip (optional)" />
               <button class="btn" type="submit">Join the waitlist</button>
             </div>
 
-            <p class="microcopy">Free to join. No spam, just one note when we launch in your neighborhood.</p>
+            <p class="microcopy">Free to join. No spam, just one note when we launch.</p>
             <p class="form-status" role="status" aria-live="polite"></p>
           </form>
         </div>
@@ -602,11 +604,12 @@
         </nav>
       </div>
 
-      <p class="disclaimer">
-        Amia Vet connects pet owners with independent, licensed California veterinarians.
-        <strong>Not for emergencies.</strong> If your pet has an emergency, contact your nearest
-        emergency veterinary hospital.
-      </p>
+      <div class="fine-print">
+        <p><strong>Not for emergencies.</strong> If your pet has an emergency, contact your nearest
+           emergency veterinary hospital.</p>
+        <p>AI guidance is for information only, is not a substitute for professional veterinary care,
+           and does not create a veterinarian-client-patient relationship.</p>
+      </div>
 
       <!-- Year is stamped by JS below; static fallback keeps it valid without scripts. -->
       <p class="copyright">&copy; <span data-year>2026</span> Amia Vet. All rights reserved.</p>
@@ -614,14 +617,13 @@
   </footer>
 
   <!-- ============================================================
-       JS: waitlist submission (no backend required)
+       JS: waitlist submission (no backend library required)
        Progressive enhancement: forms POST natively if JS is off.
   ============================================================ -->
   <script>
     (function () {
       "use strict";
 
-      // Stamp current year in the footer.
       var yearEl = document.querySelector("[data-year]");
       if (yearEl) yearEl.textContent = new Date().getFullYear();
 
@@ -649,7 +651,7 @@
 
           // Silently succeed for bots that filled the honeypot.
           if (honeypot && honeypot.value) {
-            setStatus(form, "You're on the list. We'll be in touch.", "success");
+            setStatus(form, "You're on the list.", "success");
             form.reset();
             return;
           }
@@ -673,7 +675,7 @@
 
           function onSuccess() {
             form.reset();
-            setStatus(form, "You're on the list. We'll be in touch.", "success");
+            setStatus(form, "You're on the list.", "success");
           }
           function onError() {
             setStatus(form, "Something went wrong. Please try again, or email hello@amiavet.com.", "error");
@@ -691,10 +693,7 @@
               "Accept": "application/json"
             }
           })
-            .then(function (res) {
-              if (res.ok) { onSuccess(); }
-              else { onError(); }
-            })
+            .then(function (res) { if (res.ok) { onSuccess(); } else { onError(); } })
             .catch(onError)
             .finally(done);
         });
@@ -708,6 +707,15 @@
        each signup as one line to a plain-text file (data/waitlist.csv).
        No database and no third-party service. See README.md for how to run
        it locally and how to keep the file from being wiped on Railway.
+
+       ALTERNATIVE (static hosts like Cloudflare Pages / Netlify / Vercel):
+       those cannot run server.js. To deploy there, point both <form> tags at
+       a hosted form service instead, e.g. Formspree:
+         action="https://formspree.io/f/REPLACE_WITH_FORM_ID"
+       (the existing JS already posts form fields and reads res.ok, so it works
+       with Formspree as-is). For Netlify Forms, add to each form:
+         data-netlify="true" netlify-honeypot="_gotcha" name="waitlist"
+       plus a hidden <input name="form-name" value="waitlist" />.
   ============================================================ -->
 </body>
 </html>
