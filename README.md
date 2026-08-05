@@ -1,20 +1,18 @@
 # Amia Vet
 
-Monorepo with two independently deployable services:
+Next.js + Prisma + Auth.js + Stripe + Anthropic. The whole product lives in
+`app/` and deploys as a single Railway service.
 
-| Folder      | What it is                                                              | Runs on                          |
-|-------------|-------------------------------------------------------------------------|----------------------------------|
-| `landing/`  | Current coming-soon marketing page + waitlist capture (zero-dep Node).  | Railway service, `amiavet.com`   |
-| `app/`      | Amia Vet v1 (Next.js + Prisma + Auth.js + Stripe + Anthropic).          | Separate Railway service         |
+## Layout
 
-Each folder is deployed as its own Railway service using the "Root Directory"
-setting, so builds and env vars stay isolated.
+| Folder | What it is |
+|--------|------------|
+| `app/` | The Next.js application. Everything ships from here. |
 
-## Cutover plan
+Railway's **Root Directory** for the service is set to `app`, so `app/railway.json`
+drives the build and start commands.
 
-While v1 is being built, `amiavet.com` continues to serve `landing/`. When v1
-is ready, we swap the `amiavet.com` custom domain from the landing service to
-the v1 service, then delete `landing/` in a follow-up commit.
+## Getting started
 
-See `app/README.md` for local dev, env vars, migrations, and the full cutover
-checklist.
+See [`app/README.md`](app/README.md) for local dev, environment variables,
+migrations, and deploy notes.
