@@ -21,7 +21,7 @@ export async function buildPetContext(petId: string): Promise<string> {
 
   const parts: string[] = [];
   parts.push(
-    `Pet profile:\n- Name: ${pet.name}\n- Species: ${pet.species}\n- Breed: ${pet.breed ?? "unknown"}\n- Sex: ${pet.sex ?? "unknown"}${pet.neutered != null ? ` (${pet.neutered ? "neutered/spayed" : "intact"})` : ""}\n- Birth date: ${pet.birthDate ? pet.birthDate.toISOString().slice(0, 10) : "unknown"}\n- Weight: ${pet.weightKg ? `${pet.weightKg} kg` : "unknown"}\n- Chronic conditions: ${pet.conditions ?? "none listed"}\n- Medications: ${pet.medications ?? "none listed"}\n- Allergies: ${pet.allergies ?? "none listed"}\n- Notes: ${pet.notes ?? "none"}`
+    `Pet profile:\n- Name: ${pet.name}\n- Species: ${pet.species}\n- Breed: ${pet.breed ?? "unknown"}\n- Sex: ${pet.sex ?? "unknown"}${pet.neutered != null ? ` (${pet.neutered ? "neutered/spayed" : "intact"})` : ""}\n- Birth date: ${pet.birthDate ? pet.birthDate.toISOString().slice(0, 10) : "unknown"}\n- Weight: ${pet.weightLb ? `${pet.weightLb} lb` : "unknown"}\n- Chronic conditions: ${pet.conditions ?? "none listed"}\n- Medications: ${pet.medications ?? "none listed"}\n- Allergies: ${pet.allergies ?? "none listed"}\n- Notes: ${pet.notes ?? "none"}`
   );
 
   if (pet.summary?.runningSummary) {

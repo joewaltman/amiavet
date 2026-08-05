@@ -97,7 +97,7 @@ model Pet {
   sex          String?   // "male" | "female" | "unknown"
   neutered     Boolean?
   birthDate    DateTime?
-  weightKg     Float?
+  weightLb     Float?
   // Free-text list of chronic conditions, meds, allergies.
   conditions   String?   @db.Text
   medications  String?   @db.Text

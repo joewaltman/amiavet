@@ -39,7 +39,7 @@ async function main() {
       sex: "male",
       neutered: true,
       birthDate: new Date("2019-04-01"),
-      weightKg: 18.5,
+      weightLb: 41,
       conditions: "Seasonal allergies",
       medications: "Apoquel (as-needed)",
       allergies: "None known",
@@ -53,7 +53,7 @@ async function main() {
     create: {
       petId: pet.id,
       runningSummary:
-        "Healthy 6yo neutered male Border Collie mix (18.5 kg). History of mild seasonal allergies managed with as-needed Apoquel. No chronic conditions.",
+        "Healthy 6yo neutered male Border Collie mix (41 lb). History of mild seasonal allergies managed with as-needed Apoquel. No chronic conditions.",
     },
   });
 

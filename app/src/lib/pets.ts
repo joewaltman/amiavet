@@ -7,7 +7,7 @@ const PetInput = z.object({
   breed: z.string().max(120).optional().nullable(),
   sex: z.enum(["", "male", "female"]).optional(),
   neutered: z.enum(["", "yes", "no"]).optional(),
-  weightKg: z.string().optional(),
+  weightLb: z.string().optional(),
   birthDate: z.string().optional(),
   conditions: z.string().optional(),
   medications: z.string().optional(),
@@ -25,7 +25,7 @@ export function parsePetForm(fd: FormData) {
     sex: parsed.sex ? parsed.sex : null,
     neutered:
       parsed.neutered === "yes" ? true : parsed.neutered === "no" ? false : null,
-    weightKg: parsed.weightKg ? Number(parsed.weightKg) : null,
+    weightLb: parsed.weightLb ? Number(parsed.weightLb) : null,
     birthDate: parsed.birthDate ? new Date(parsed.birthDate) : null,
     conditions: nullify(parsed.conditions),
     medications: nullify(parsed.medications),

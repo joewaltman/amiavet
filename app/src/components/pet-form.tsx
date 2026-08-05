@@ -79,13 +79,13 @@ export function PetForm({
           </select>
         </div>
         <div>
-          <label className="label" htmlFor="weightKg">Weight (kg)</label>
+          <label className="label" htmlFor="weightLb">Weight (lb)</label>
           <input
-            id="weightKg"
-            name="weightKg"
+            id="weightLb"
+            name="weightLb"
             type="number"
             step="0.1"
-            defaultValue={pet?.weightKg ?? ""}
+            defaultValue={pet?.weightLb ?? ""}
             className="input"
           />
         </div>
