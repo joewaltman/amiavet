@@ -2,22 +2,18 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getDraft, clearDraft } from "@/lib/draft";
+import { getDraft } from "@/lib/draft";
 
 export default async function DashboardPage() {
   const session = await auth();
   const userId = (session!.user as { id: string }).id;
 
-  // If a draft question was captured pre-auth, complete it now by
-  // POSTing to /api/ask on the client's behalf: redirect through a small
-  // consult creation flow.
+  // If a draft question was captured pre-auth, hand it off to the Route
+  // Handler that can safely clear the cookie and create the consult.
+  // Server Components can read cookies but not modify them.
   const draft = await getDraft();
-  if (draft && draft.question) {
-    // Create the consult server-side so we don't rely on the browser making
-    // a second call after login.
-    const created = await createConsultFromDraft(userId, draft.question);
-    await clearDraft();
-    redirect(`/consults/${created.id}`);
+  if (draft?.question) {
+    redirect("/api/complete-draft");
   }
 
   const [pets, consults] = await Promise.all([
@@ -99,11 +95,4 @@ export default async function DashboardPage() {
       </section>
     </div>
   );
-}
-
-// Local helper that mirrors /api/ask's create-consult path, without the HTTP hop.
-// (Phase 3 wires up the real AI call. Until then this creates a placeholder.)
-async function createConsultFromDraft(userId: string, question: string) {
-  const { createConsult } = await import("@/lib/consults");
-  return createConsult({ ownerId: userId, question });
 }
