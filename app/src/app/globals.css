@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+/* Amia Vet brand tokens */
+:root {
+  --sage: #1F6F5C;
+  --green-dark: #175646;
+  --green-soft: #E7F0EC;
+  --cream: #FBF9F4;
+  --ink: #1A1A2E;
+  --muted: #55566A;
+  --terracotta: #C2410C;
+  --terracotta-soft: #FBEDE4;
+  --border: #ECE7DD;
+  --ring: #1F6F5C;
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(26,26,46,.04), 0 2px 8px rgba(26,26,46,.05);
+  --shadow: 0 4px 12px rgba(26,26,46,.06), 0 12px 32px rgba(26,26,46,.07);
+  --shadow-lg: 0 10px 24px rgba(31,111,92,.10), 0 24px 60px rgba(26,26,46,.10);
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-sage: var(--sage);
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --color-terracotta: var(--terracotta);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-geist-mono);
+  --radius-sm: var(--radius-sm);
+  --radius: var(--radius);
+  --radius-lg: var(--radius-lg);
+  --radius-pill: var(--radius-pill);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  line-height: 1.6;
+}
+
+/* Simple form defaults so we can move fast in Phase 2. */
+.input {
+  @apply w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-ink placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-sage;
+}
+.label {
+  @apply block text-sm font-medium text-ink mb-1;
+}
+.btn {
+  @apply inline-flex items-center justify-center rounded-lg bg-sage px-4 py-2 font-medium text-white shadow-sm hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-sage disabled:opacity-50;
+}
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-lg border border-neutral-300 bg-white px-4 py-2 font-medium text-ink hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-sage;
+}
+.btn-terracotta {
+  @apply inline-flex items-center justify-center rounded-lg bg-terracotta px-4 py-2 font-medium text-white shadow-sm hover:bg-orange-800 focus:outline-none focus:ring-2 focus:ring-terracotta;
+}
+.card {
+  @apply rounded-xl border border-neutral-200 bg-white p-5 shadow-sm;
+}
+
+/* Landing-page layout helpers, ported from the old static landing. */
+.wrap {
+  width: 100%;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+.section {
+  padding-top: 68px;
+  padding-bottom: 68px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--green-dark);
+  background: var(--green-soft);
+  border: 1px solid rgba(31,111,92,.16);
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.tier-tag {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-bottom: 14px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+}
+.tier-tag-ai { color: var(--terracotta); background: var(--terracotta-soft); }
+.tier-tag-vet { color: var(--green-dark); background: var(--green-soft); }
+
+/* Subtle radial-gradient wash behind the hero. */
+.hero-bg {
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(60% 55% at 85% 0%, rgba(31,111,92,.10), transparent 60%),
+    radial-gradient(50% 50% at 5% 30%, rgba(194,65,12,.06), transparent 60%);
+}
+
+/* Accessibility: skip link (visible only when focused). */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  background: var(--sage);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  z-index: 100;
+  transition: top 0.15s ease;
+  font-weight: 600;
+  text-decoration: none;
+}
+.skip-link:focus { top: 12px; }
+
+:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}

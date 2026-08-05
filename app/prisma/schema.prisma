@@ -1,0 +1,255 @@
+// Amia Vet v1 data model.
+// Owners submit consults for their pets; vets review the AI answer and
+// optionally offer a video visit.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------------------------------------------------------
+// Auth.js v5 standard tables (Prisma adapter)
+// https://authjs.dev/getting-started/adapters/prisma
+// -------------------------------------------------------------------
+
+enum Role {
+  owner
+  vet
+  admin
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(owner)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+
+  // Owner-side
+  pets          Pet[]
+  consults      Consult[] @relation("OwnerConsults")
+
+  // Vet-side
+  vetReviews    VetReview[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// -------------------------------------------------------------------
+// Domain model
+// -------------------------------------------------------------------
+
+enum Species {
+  dog
+  cat
+  other
+}
+
+model Pet {
+  id           String    @id @default(cuid())
+  ownerId      String
+  name         String
+  species      Species   @default(dog)
+  breed        String?
+  sex          String?   // "male" | "female" | "unknown"
+  neutered     Boolean?
+  birthDate    DateTime?
+  weightKg     Float?
+  // Free-text list of chronic conditions, meds, allergies.
+  conditions   String?   @db.Text
+  medications  String?   @db.Text
+  allergies    String?   @db.Text
+  notes        String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  owner        User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  summary      PetSummary?
+  consults     Consult[]
+
+  @@index([ownerId])
+}
+
+// One rolling AI-maintained summary per pet. Injected into every consult prompt.
+model PetSummary {
+  id              String   @id @default(cuid())
+  petId           String   @unique
+  runningSummary  String   @db.Text
+  updatedAt       DateTime @updatedAt
+
+  pet             Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+}
+
+enum ConsultStatus {
+  // Owner submitted question, AI answered, no payment yet.
+  ai_answered
+  // Owner paid $20 for vet review.
+  review_requested
+  // Vet has posted feedback / verdict.
+  review_complete
+  // Owner paid $40 for a video visit.
+  video_booked
+  // Vet closed the case.
+  closed
+}
+
+model Consult {
+  id             String        @id @default(cuid())
+  ownerId        String
+  petId          String?
+  status         ConsultStatus @default(ai_answered)
+
+  // Original owner question + AI answer.
+  question       String        @db.Text
+  // Optional follow-up Q/A pairs captured before finalizing (JSON array).
+  followups      Json?
+  aiAnswer       String?       @db.Text
+  aiUrgency      String?       // "emergency" | "same-day" | "routine" | "info"
+  aiSummary      String?       @db.Text // short summary the vet sees
+
+  // Flag set by the AI if the prompt suggests a red-flag emergency.
+  emergencyFlag  Boolean       @default(false)
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  owner          User          @relation("OwnerConsults", fields: [ownerId], references: [id], onDelete: Cascade)
+  pet            Pet?          @relation(fields: [petId], references: [id], onDelete: SetNull)
+
+  payments       Payment[]
+  aiLogs         AiLog[]
+  vetReview      VetReview?
+  videoBooking   VideoBooking?
+
+  @@index([ownerId, createdAt])
+  @@index([status])
+}
+
+// Full audit row for every Anthropic call (owner-side or vet-probe).
+model AiLog {
+  id           String   @id @default(cuid())
+  consultId    String?
+  vetReviewId  String?
+  model        String
+  systemPrompt String   @db.Text
+  userPrompt   String   @db.Text
+  response     String   @db.Text
+  inputTokens  Int?
+  outputTokens Int?
+  latencyMs    Int?
+  // "owner_ask" | "owner_followup" | "vet_probe"
+  kind         String
+  createdAt    DateTime @default(now())
+
+  consult      Consult?     @relation(fields: [consultId], references: [id], onDelete: SetNull)
+  vetReview    VetReview?   @relation(fields: [vetReviewId], references: [id], onDelete: SetNull)
+
+  @@index([consultId, createdAt])
+}
+
+enum ReviewVerdict {
+  agree
+  clarify
+  disagree
+}
+
+model VetReview {
+  id           String        @id @default(cuid())
+  consultId    String        @unique
+  vetId        String
+  verdict      ReviewVerdict
+  feedback     String        @db.Text
+  // Raw log of probes the vet ran while reviewing (array of {q,a,at}).
+  aiProbeLog   Json?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  consult      Consult       @relation(fields: [consultId], references: [id], onDelete: Cascade)
+  vet          User          @relation(fields: [vetId], references: [id], onDelete: Cascade)
+  aiLogs       AiLog[]
+}
+
+enum PaymentKind {
+  review
+  video
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  refunded
+  failed
+}
+
+model Payment {
+  id                     String        @id @default(cuid())
+  consultId              String
+  ownerId                String
+  kind                   PaymentKind
+  amountCents            Int
+  currency               String        @default("usd")
+  status                 PaymentStatus @default(pending)
+  stripeCheckoutSessionId String?      @unique
+  stripePaymentIntentId  String?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  consult                Consult       @relation(fields: [consultId], references: [id], onDelete: Cascade)
+
+  @@index([consultId])
+  @@index([ownerId])
+}
+
+model VideoBooking {
+  id           String   @id @default(cuid())
+  consultId    String   @unique
+  bookingUrl   String   @db.Text
+  scheduledAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  consult      Consult  @relation(fields: [consultId], references: [id], onDelete: Cascade)
+}
