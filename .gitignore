@@ -2,4 +2,13 @@ node_modules/
 .DS_Store
 
 # Collected waitlist emails — never commit these.
-data/
+landing/data/
+
+# Next.js / v1 app
+app/.next/
+app/node_modules/
+app/.env
+app/.env.local
+app/.env*.local
+app/next-env.d.ts
+app/tsconfig.tsbuildinfo
