@@ -4,8 +4,10 @@ import { AskFlow } from "@/components/ask-flow";
 import { HowItWorks } from "@/components/how-it-works";
 import { Pricing } from "@/components/pricing";
 import { TrustBand } from "@/components/trust-band";
+import { AnalyticsBoot } from "@/components/analytics-boot";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getActor } from "@/lib/actor";
 
 // Public home page. Same page for anonymous and signed-in visitors.
 // AskFlow drives the two-stage triage → answer flow inline (no page
@@ -14,6 +16,13 @@ import { prisma } from "@/lib/db";
 export default async function Home() {
   const session = await auth();
   const userId = (session?.user as { id?: string } | undefined)?.id;
+
+  // Materialize a guest User + set cookies on the very first request
+  // so the client-side posthog-js bootstrap can pick up the guestToken
+  // on the immediately-following pageview.
+  if (!userId) {
+    await getActor();
+  }
 
   const pets = userId
     ? await prisma.pet.findMany({
@@ -34,6 +43,7 @@ export default async function Home() {
         Skip to the ask box
       </a>
       <SiteHeader />
+      <AnalyticsBoot session={userId ? { userId } : null} />
       <main id="main" className="flex-1">
         {/* Hero + AskFlow */}
         <section className="hero-bg" aria-labelledby="hero-title">

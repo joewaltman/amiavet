@@ -4,9 +4,22 @@
 // owner through Ask → Thinking → (optional Follow-up) → Answer, then
 // offers save + upsell CTAs.
 //
-// No page navigation between stages — everything is client state. The
-// server is only touched for /api/consults/triage, /answer, and /save.
-import { useState } from "react";
+// Guest-friendly:
+//   * The server materializes a guest User row on the first request
+//     (see lib/actor.ts); this component never redirects on 401.
+//   * On entering the answered stage we fire-and-forget /save so the
+//     consult exists before the user hits any CTA.
+//   * Paid CTAs (review/video) require auth: for guests we set a
+//     signed after-auth cookie via /api/after-auth/set and bounce to
+//     /login?callbackUrl=/api/after-auth. After sign-in the server
+//     redirects straight to Stripe Checkout.
+//   * The free-limit gate arrives as a 429; we swap to a "sign up to
+//     continue" screen instead of the ask form.
+//
+// PostHog events fire at each transition. sessionId is minted per
+// question and threaded through triage + answer so the server-side
+// events can be joined with the client ones.
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type {
   AnswerResult,
@@ -14,6 +27,7 @@ import type {
   TriageResult,
 } from "@/lib/ai/schemas";
 import { AnswerCard } from "@/components/answer-card";
+import { trackClient } from "@/lib/analytics";
 
 export type AskFlowPet = {
   id: string;
@@ -31,15 +45,18 @@ type Stage =
   | { name: "thinking"; label: string }
   | {
       name: "followup";
+      sessionId: string;
       triage: TriageResult;
       answers: Record<string, string | string[] | null>;
     }
   | {
       name: "answered";
+      sessionId: string;
       triage: TriageResult;
       followupAnswers: Record<string, string | string[] | null>;
       answer: AnswerResult;
-    };
+    }
+  | { name: "limited"; limit: number };
 
 // Small library of scaffolded openers. Each chip prepends its scaffold
 // to the textarea (does not submit). Owners edit from there.
@@ -72,6 +89,8 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
       setErr("Give us a little more detail — 10+ characters.");
       return;
     }
+    const sessionId = crypto.randomUUID();
+    trackClient("question_started", { sessionId });
     setStage({ name: "thinking", label: "Amia is thinking…" });
     try {
       const res = await fetch("/api/consults/triage", {
@@ -80,9 +99,16 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
         body: JSON.stringify({
           questionText,
           petId: petId || null,
+          sessionId,
         }),
       });
       const data = await res.json();
+      if (res.status === 429 && data?.code === "free_limit_hit") {
+        // Triage doesn't gate on the free cap today, but keep the
+        // handler symmetric with /answer in case that changes.
+        handleFreeLimit(data.limit ?? 0);
+        return;
+      }
       if (!res.ok) {
         setStage({ name: "ask" });
         setErr(data?.error ?? "Something went wrong.");
@@ -95,9 +121,9 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
         for (const f of triage.followups) {
           seed[f.id] = f.multiSelect ? [] : "";
         }
-        setStage({ name: "followup", triage, answers: seed });
+        setStage({ name: "followup", sessionId, triage, answers: seed });
       } else {
-        await goAnswer(questionText, triage, {});
+        await goAnswer(questionText, sessionId, triage, {});
       }
     } catch {
       setStage({ name: "ask" });
@@ -107,6 +133,7 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
 
   async function goAnswer(
     questionText: string,
+    sessionId: string,
     triage: TriageResult,
     answers: Record<string, string | string[] | null>
   ) {
@@ -120,9 +147,14 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
           petId: petId || null,
           triage,
           followupAnswers: answers,
+          sessionId,
         }),
       });
       const data = await res.json();
+      if (res.status === 429 && data?.code === "free_limit_hit") {
+        handleFreeLimit(data.limit ?? 0);
+        return;
+      }
       if (!res.ok) {
         setStage({ name: "ask" });
         setErr(data?.error ?? "Something went wrong.");
@@ -130,6 +162,7 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
       }
       setStage({
         name: "answered",
+        sessionId,
         triage,
         followupAnswers: answers,
         answer: data.answer as AnswerResult,
@@ -140,9 +173,19 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
     }
   }
 
+  function handleFreeLimit(limit: number) {
+    trackClient("free_limit_hit", { limit });
+    trackClient("auth_gate_shown", { trigger: "free_limit" });
+    setStage({ name: "limited", limit });
+  }
+
   function onTopicChip(scaffold: string) {
     setQ((prev) => (prev.trim() ? `${prev}\n${scaffold}` : scaffold));
   }
+
+  const selectedPet = petId
+    ? initialPets.find((p) => p.id === petId) ?? null
+    : null;
 
   return (
     <div id="ask">
@@ -170,7 +213,7 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
           ) : null}
 
           <label className="label" htmlFor="q">
-            What's going on with your pet?
+            What&apos;s going on with your pet?
           </label>
           <textarea
             id="q"
@@ -215,16 +258,20 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
       {stage.name === "followup" && (
         <FollowupStage
           questionText={q}
+          sessionId={stage.sessionId}
           triage={stage.triage}
           answers={stage.answers}
           onAnswersChange={(next) =>
             setStage({
               name: "followup",
+              sessionId: stage.sessionId,
               triage: stage.triage,
               answers: next,
             })
           }
-          onContinue={() => goAnswer(q, stage.triage, stage.answers)}
+          onContinue={() =>
+            goAnswer(q, stage.sessionId, stage.triage, stage.answers)
+          }
         />
       )}
 
@@ -232,6 +279,8 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
         <AnsweredStage
           questionText={q}
           petId={petId || null}
+          petName={selectedPet?.name ?? null}
+          sessionId={stage.sessionId}
           triage={stage.triage}
           followupAnswers={stage.followupAnswers}
           answer={stage.answer}
@@ -244,6 +293,17 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
           router={router}
         />
       )}
+
+      {stage.name === "limited" && (
+        <LimitedStage
+          limit={stage.limit}
+          onReset={() => {
+            setStage({ name: "ask" });
+            setQ("");
+            setErr(null);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -252,11 +312,19 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
 
 function FollowupStage(props: {
   questionText: string;
+  sessionId: string;
   triage: TriageResult;
   answers: Record<string, string | string[] | null>;
   onAnswersChange: (next: Record<string, string | string[] | null>) => void;
   onContinue: () => void;
 }) {
+  const num = props.triage.followups.length;
+  useEffect(() => {
+    trackClient("followup_shown", {
+      sessionId: props.sessionId,
+      numQuestions: num,
+    });
+  }, [props.sessionId, num]);
   return (
     <div className="card space-y-6">
       <blockquote className="border-l-2 border-neutral-300 pl-3 text-sm italic text-neutral-600">
@@ -278,7 +346,16 @@ function FollowupStage(props: {
         ))}
       </div>
       <div className="flex justify-end">
-        <button className="btn" onClick={props.onContinue}>
+        <button
+          className="btn"
+          onClick={() => {
+            trackClient("followup_submitted", {
+              sessionId: props.sessionId,
+              numQuestions: num,
+            });
+            props.onContinue();
+          }}
+        >
           Continue
         </button>
       </div>
@@ -366,6 +443,8 @@ function FollowupField(props: {
 function AnsweredStage(props: {
   questionText: string;
   petId: string | null;
+  petName: string | null;
+  sessionId: string;
   triage: TriageResult;
   followupAnswers: Record<string, string | string[] | null>;
   answer: AnswerResult;
@@ -373,14 +452,60 @@ function AnsweredStage(props: {
   onReset: () => void;
   router: ReturnType<typeof useRouter>;
 }) {
-  const [busy, setBusy] = useState<"review" | "video" | "save" | null>(null);
+  const [busy, setBusy] = useState<"review" | "video" | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [consultId, setConsultId] = useState<string | null>(null);
+  const [isGuest, setIsGuest] = useState<boolean>(!props.isAuthed);
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
 
-  async function save(thenTo: "dashboard" | "review" | "video") {
-    setBusy(thenTo === "dashboard" ? "save" : thenTo);
-    setErr(null);
+  // Auto-save on entering the answered stage. Fire-and-forget: the CTAs
+  // fall back to a per-click save if this hasn't landed yet.
+  const savedOnce = useRef(false);
+  useEffect(() => {
+    if (savedOnce.current) return;
+    savedOnce.current = true;
+    (async () => {
+      try {
+        const r = await fetch("/api/consults/save", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            petId: props.petId,
+            questionText: props.questionText,
+            triage: props.triage,
+            followupAnswers: props.followupAnswers,
+            answer: props.answer,
+            thenTo: "dashboard",
+          }),
+        });
+        if (!r.ok) return;
+        const data = await r.json();
+        if (data?.consultId) setConsultId(data.consultId);
+        if (typeof data?.isGuest === "boolean") setIsGuest(data.isGuest);
+      } catch {
+        // Silent — save is best-effort. CTAs will retry if needed.
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    trackClient("answer_viewed", {
+      sessionId: props.sessionId,
+      consultId,
+    });
+  }, [props.sessionId, consultId]);
+
+  // If the initial auto-save hasn't landed by CTA click time, do a
+  // synchronous save to make sure we have a consultId before the
+  // after-auth or Stripe redirect.
+  async function ensureConsultId(): Promise<{
+    consultId: string;
+    isGuest: boolean;
+  } | null> {
+    if (consultId) return { consultId, isGuest };
     try {
-      const res = await fetch("/api/consults/save", {
+      const r = await fetch("/api/consults/save", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -389,40 +514,75 @@ function AnsweredStage(props: {
           triage: props.triage,
           followupAnswers: props.followupAnswers,
           answer: props.answer,
-          thenTo,
+          thenTo: "dashboard",
         }),
       });
-      const data = await res.json();
-      if (res.status === 401 && data?.redirect) {
-        props.router.push(data.redirect);
+      if (!r.ok) return null;
+      const data = await r.json();
+      if (!data?.consultId) return null;
+      setConsultId(data.consultId);
+      setIsGuest(!!data.isGuest);
+      return { consultId: data.consultId, isGuest: !!data.isGuest };
+    } catch {
+      return null;
+    }
+  }
+
+  async function goPaid(kind: "review" | "video") {
+    setBusy(kind);
+    setErr(null);
+    try {
+      const saved = await ensureConsultId();
+      if (!saved) {
+        setErr("Could not save your consult. Try again.");
         return;
       }
-      if (!res.ok) {
-        setErr(data?.error ?? "Something went wrong.");
-        return;
-      }
-      const consultId: string = data.consultId;
-      if (thenTo === "review" || thenTo === "video") {
-        const checkout = await fetch("/api/stripe/checkout", {
+      trackClient("cta_clicked", {
+        consultId: saved.consultId,
+        tier: kind === "review" ? "vet_review" : "video",
+      });
+      if (saved.isGuest) {
+        // Guest -> bounce through login. Stash the intent server-side
+        // so the after-auth handler can build the Stripe session
+        // without a client round-trip.
+        trackClient("auth_gate_shown", { trigger: kind });
+        const stash = await fetch("/api/after-auth/set", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ consultId, kind: thenTo }),
+          body: JSON.stringify({
+            intent: kind,
+            consultId: saved.consultId,
+          }),
         });
-        const cData = await checkout.json();
-        if (!checkout.ok || !cData.url) {
-          setErr(cData.error ?? "Could not start checkout.");
+        if (!stash.ok) {
+          setErr("Could not start sign-in flow. Try again.");
           return;
         }
-        window.location.href = cData.url;
+        props.router.push(
+          `/login?callbackUrl=${encodeURIComponent("/api/after-auth")}`
+        );
         return;
       }
-      props.router.push(`/consults/${consultId}`);
+      // Authed: hit Stripe directly.
+      const checkout = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ consultId: saved.consultId, kind }),
+      });
+      const cData = await checkout.json();
+      if (!checkout.ok || !cData.url) {
+        setErr(cData.error ?? "Could not start checkout.");
+        return;
+      }
+      window.location.href = cData.url;
     } catch {
       setErr("Network error.");
     } finally {
       setBusy(null);
     }
   }
+
+  const showNudge = isGuest && !nudgeDismissed;
 
   return (
     <div className="space-y-4">
@@ -433,7 +593,7 @@ function AnsweredStage(props: {
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <button
             className="btn"
-            onClick={() => save("review")}
+            onClick={() => goPaid("review")}
             disabled={busy !== null}
           >
             {busy === "review"
@@ -442,22 +602,13 @@ function AnsweredStage(props: {
           </button>
           <button
             className="btn-terracotta"
-            onClick={() => save("video")}
+            onClick={() => goPaid("video")}
             disabled={busy !== null}
           >
             {busy === "video"
               ? "Loading…"
               : "Book a 15-minute video visit · $40"}
           </button>
-          {props.isAuthed ? (
-            <button
-              className="btn-secondary"
-              onClick={() => save("dashboard")}
-              disabled={busy !== null}
-            >
-              {busy === "save" ? "Saving…" : "Save to my dashboard"}
-            </button>
-          ) : null}
           <button
             type="button"
             className="btn-secondary"
@@ -468,6 +619,59 @@ function AnsweredStage(props: {
           </button>
         </div>
         {err && <p className="text-sm text-terracotta">{err}</p>}
+      </div>
+
+      {showNudge ? (
+        <div className="card flex items-start justify-between gap-3 bg-emerald-50 text-sm text-emerald-900">
+          <p>
+            Create a free account to save
+            {props.petName ? ` ${props.petName}'s` : " your pet's"} history.{" "}
+            <a
+              className="underline"
+              href="/login?callbackUrl=/dashboard"
+              onClick={() =>
+                trackClient("auth_gate_shown", { trigger: "save" })
+              }
+            >
+              Sign up →
+            </a>
+          </p>
+          <button
+            type="button"
+            className="text-xs text-emerald-900/70 underline"
+            onClick={() => setNudgeDismissed(true)}
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+// ---------- Free-limit stage ----------
+
+function LimitedStage(props: { limit: number; onReset: () => void }) {
+  return (
+    <div className="card space-y-3">
+      <div className="text-lg font-semibold text-ink">
+        You&apos;ve used your free questions for today
+      </div>
+      <p className="text-sm text-neutral-700">
+        You get {props.limit} free AI answers per day as a guest. Create a
+        free account to keep going and save your pet&apos;s history.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <a className="btn" href="/login?callbackUrl=/">
+          Sign up to continue
+        </a>
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={props.onReset}
+        >
+          Back
+        </button>
       </div>
     </div>
   );
@@ -486,4 +690,3 @@ function ThinkingSpinner() {
     />
   );
 }
-

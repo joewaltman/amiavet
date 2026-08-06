@@ -1,23 +1,11 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getDraft, hasSaveIntent } from "@/lib/draft";
 import { AskFlow } from "@/components/ask-flow";
 
 export default async function DashboardPage() {
   const session = await auth();
   const userId = (session!.user as { id: string }).id;
-
-  // Post-login replay of a stashed two-stage session takes precedence.
-  if (await hasSaveIntent()) {
-    redirect("/api/consults/complete-save");
-  }
-  // Legacy: a bare-question draft from the pre-two-stage AskBox.
-  const draft = await getDraft();
-  if (draft?.question) {
-    redirect("/api/complete-draft");
-  }
 
   const [pets, consults] = await Promise.all([
     prisma.pet.findMany({ where: { ownerId: userId }, orderBy: { createdAt: "asc" } }),

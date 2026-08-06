@@ -185,7 +185,10 @@ export default async function ConsultPage({
           <div className="mt-4 text-sm">
             <a
               className="text-sage underline"
-              href={consult.videoBooking.bookingUrl}
+              href={appendConsultMetadata(
+                consult.videoBooking.bookingUrl,
+                consult.id
+              )}
               target="_blank"
               rel="noreferrer"
             >
@@ -201,4 +204,13 @@ export default async function ConsultPage({
       </p>
     </div>
   );
+}
+
+// Cal.com passes booking metadata through as query params of the form
+// metadata[key]=value; the value round-trips back to us in the
+// BOOKING_PAID webhook payload's payload.metadata.consultId so we can
+// look up the right consult.
+function appendConsultMetadata(url: string, consultId: string): string {
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}metadata[consultId]=${encodeURIComponent(consultId)}`;
 }

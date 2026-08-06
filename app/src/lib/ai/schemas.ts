@@ -56,6 +56,10 @@ export type AnswerResult = z.infer<typeof AnswerResultSchema>;
 export const TriageRequestSchema = z.object({
   petId: z.string().nullable().optional(),
   questionText: z.string().min(10).max(4000),
+  // Client-minted per-ask uuid; threaded through triage + answer so
+  // PostHog can join the funnel events that fire before a Consult row
+  // exists.
+  sessionId: z.string().min(1).optional(),
 });
 export type TriageRequest = z.infer<typeof TriageRequestSchema>;
 
@@ -72,6 +76,7 @@ export const AnswerRequestSchema = z.object({
   questionText: z.string().min(10).max(4000),
   triage: TriageResultSchema,
   followupAnswers: FollowupAnswersSchema.default({}),
+  sessionId: z.string().min(1).optional(),
 });
 export type AnswerRequest = z.infer<typeof AnswerRequestSchema>;
 

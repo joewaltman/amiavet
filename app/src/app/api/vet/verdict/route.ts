@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireVet } from "@/lib/roles";
 import { prisma } from "@/lib/db";
 import { sendVetReviewEmail } from "@/lib/email/resend";
+import { trackServer } from "@/lib/analytics-server";
 
 const ProbeItem = z.object({
   q: z.string(),
@@ -61,8 +62,17 @@ export async function POST(req: Request) {
     data: { status: "review_complete" },
   });
 
+  // Emit after the status flip commits — distinct_id is the owner's
+  // userId (never the vet's) so the funnel reads correctly.
+  trackServer(consult.ownerId, "vet_review_completed", {
+    consultId: consult.id,
+  });
+
   // Best-effort email; don't fail the request if Resend isn't configured yet.
   try {
+    if (!consult.owner.email) {
+      throw new Error("consult owner has no email");
+    }
     await sendVetReviewEmail({
       to: consult.owner.email,
       consultId: consult.id,

@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
+import { trackServer } from "@/lib/analytics-server";
 
 // Stripe needs the raw body to verify the signature.
 export const runtime = "nodejs";
@@ -85,4 +86,17 @@ async function handleCheckoutCompleted(cs: Stripe.Checkout.Session) {
       });
     }
   });
+
+  // Fire after the transaction commits so we never emit a
+  // payment_succeeded for a payment we didn't actually mark paid.
+  // Video payments also fire from the Cal.com webhook once the visit
+  // is scheduled; both events carry the same consultId + tier so
+  // funnel joins in PostHog still work.
+  if (payment.kind === "review") {
+    trackServer(payment.ownerId, "payment_succeeded", {
+      consultId: payment.consultId,
+      tier: "review",
+      amountCents: payment.amountCents,
+    });
+  }
 }

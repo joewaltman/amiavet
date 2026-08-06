@@ -25,10 +25,18 @@ enum Role {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String    @unique
+  // Nullable so anonymous "guest" users (isGuest=true) can exist before
+  // they hand us an email. Auth.js is fine with a nullable unique email
+  // as long as authenticated rows never collide on null.
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
   role          Role      @default(owner)
+  isGuest       Boolean   @default(false)
+  // Random opaque token stored in the signed httpOnly cookie so we can
+  // resolve the same guest row across requests + also used as the
+  // PostHog distinct_id for pre-auth activity.
+  guestToken    String?   @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -38,6 +46,7 @@ model User {
   // Owner-side
   pets          Pet[]
   consults      Consult[] @relation("OwnerConsults")
+  guestUsage    GuestUsageDay[]
 
   // Vet-side
   vetReviews    VetReview[]
@@ -275,4 +284,17 @@ model VideoBooking {
   updatedAt    DateTime @updatedAt
 
   consult      Consult  @relation(fields: [consultId], references: [id], onDelete: Cascade)
+}
+
+// Daily counter used to cap free AI answers per guest user. One row per
+// guest per UTC day; incremented after each successful answer.
+model GuestUsageDay {
+  id     String @id @default(cuid())
+  userId String
+  day    String // YYYY-MM-DD in UTC
+  count  Int    @default(0)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
 }
