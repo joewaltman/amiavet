@@ -49,9 +49,9 @@ export default async function Home() {
               </span>
             </h1>
             <p className="mt-5 max-w-2xl text-lg text-[color:var(--muted)]">
-              Ask a real question about your pet and get instant AI guidance,
-              clearly labeled as AI. A California-licensed veterinarian is one
-              click away to review it or meet you on a video call.
+              Ask a real question about your pet and get instant AI guidance.
+              A California-licensed veterinarian is one click away to review
+              it or meet you on a video call.
             </p>
 
             <div className="mt-8">

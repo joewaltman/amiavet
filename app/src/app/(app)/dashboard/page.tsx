@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getDraft, hasSaveIntent } from "@/lib/draft";
+import { AskFlow } from "@/components/ask-flow";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -28,11 +29,24 @@ export default async function DashboardPage() {
     }),
   ]);
 
+  const askFlowPets = pets.map((p) => ({
+    id: p.id,
+    name: p.name,
+    species: p.species,
+  }));
+
   return (
     <div className="space-y-8">
       <section>
+        <h1 className="text-2xl font-semibold text-ink">Ask Amia</h1>
+        <div className="mt-4">
+          <AskFlow initialPets={askFlowPets} isAuthed={true} />
+        </div>
+      </section>
+
+      <section>
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-ink">Your pets</h1>
+          <h2 className="text-xl font-semibold text-ink">Your pets</h2>
           <Link href="/pets/new" className="btn">
             Add a pet
           </Link>
@@ -68,7 +82,7 @@ export default async function DashboardPage() {
         <h2 className="text-xl font-semibold text-ink">Recent consults</h2>
         {consults.length === 0 ? (
           <div className="card mt-3 text-neutral-700">
-            No consults yet. Ask a question from the <Link href="/" className="text-sage underline">home page</Link>.
+            No consults yet. Ask a question above to get started.
           </div>
         ) : (
           <ul className="mt-3 space-y-3">
