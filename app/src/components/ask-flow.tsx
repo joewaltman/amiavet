@@ -27,7 +27,7 @@ import type {
   TriageResult,
 } from "@/lib/ai/schemas";
 import { AnswerCard } from "@/components/answer-card";
-import { trackClient } from "@/lib/analytics";
+import { trackClient, identifyGuestFromCookie } from "@/lib/analytics";
 
 export type AskFlowPet = {
   id: string;
@@ -102,6 +102,11 @@ export function AskFlow({ initialPets, isAuthed }: Props) {
           sessionId,
         }),
       });
+      // Triage always calls getActor() server-side, which sets the
+      // amia_guest_pub cookie on this response for fresh guests.
+      // Identify posthog-js to the guestToken now so client events use
+      // the same distinct_id the server has been emitting under.
+      identifyGuestFromCookie();
       const data = await res.json();
       if (res.status === 429 && data?.code === "free_limit_hit") {
         // Triage doesn't gate on the free cap today, but keep the

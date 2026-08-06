@@ -101,3 +101,51 @@ export function trackClient<E extends AnalyticsEventName>(
 // trackServer lives in ./analytics-server.ts so client bundles that
 // import this file for trackClient / the type map never trace into
 // posthog-node's "server-only" chain.
+
+// ---------------- guest identity stitch ----------------
+
+// Reads the amia_guest_pub cookie (set by /api/consults/triage the
+// first time a guest hits the server) and calls posthog.identify() so
+// the client's distinct_id matches the guestToken the server is using.
+// posthog-js emits $identify with $anon_distinct_id set to the previous
+// SDK-generated anon id, so PostHog's backend merges the pre-cookie
+// pageview + question_started events onto the same person as every
+// subsequent server event.
+//
+// Idempotent per browser session via sessionStorage; safe to call from
+// multiple places.
+const GUEST_ID_SENTINEL = "amia_ph_guest_id_v1";
+
+export function identifyGuestFromCookie(): void {
+  if (typeof window === "undefined") return;
+  if (!analyticsEnabled()) return;
+  const match = document.cookie.match(/(?:^|; )amia_guest_pub=([^;]+)/);
+  if (!match) return;
+  const guestToken = decodeURIComponent(match[1]);
+  try {
+    if (window.sessionStorage.getItem(GUEST_ID_SENTINEL) === guestToken) return;
+  } catch {
+    // sessionStorage can throw in strict privacy modes; fall through.
+  }
+  import("posthog-js")
+    .then(({ default: posthog }) => {
+      const current = posthog.get_distinct_id?.();
+      if (current === guestToken) {
+        try {
+          window.sessionStorage.setItem(GUEST_ID_SENTINEL, guestToken);
+        } catch {
+          /* ignore */
+        }
+        return;
+      }
+      posthog.identify(guestToken);
+      try {
+        window.sessionStorage.setItem(GUEST_ID_SENTINEL, guestToken);
+      } catch {
+        /* ignore */
+      }
+    })
+    .catch(() => {
+      // Analytics failures never bubble to the UI.
+    });
+}
