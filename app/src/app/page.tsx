@@ -7,22 +7,23 @@ import { TrustBand } from "@/components/trust-band";
 import { AnalyticsBoot } from "@/components/analytics-boot";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getActor } from "@/lib/actor";
 
 // Public home page. Same page for anonymous and signed-in visitors.
 // AskFlow drives the two-stage triage → answer flow inline (no page
 // navigation). Anon users get the full experience; the flow only asks
 // for auth if they choose to persist (save, review, or video visit).
+//
+// We deliberately do NOT materialize a guest User here — Next.js
+// server components are read-only for cookies, and getActor() sets
+// two cookies. The guest is materialized inside /api/consults/triage
+// on the first Ask click, which is a Route Handler and can mutate
+// cookies. Trade-off: the very first pageview's posthog-js distinct_id
+// is a random SDK anon id rather than the guestToken. The server-side
+// funnel starts at question_submitted (using the guestToken directly),
+// and sign-in stitches everything via $identify + $anon_distinct_id.
 export default async function Home() {
   const session = await auth();
   const userId = (session?.user as { id?: string } | undefined)?.id;
-
-  // Materialize a guest User + set cookies on the very first request
-  // so the client-side posthog-js bootstrap can pick up the guestToken
-  // on the immediately-following pageview.
-  if (!userId) {
-    await getActor();
-  }
 
   const pets = userId
     ? await prisma.pet.findMany({
