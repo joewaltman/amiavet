@@ -97,26 +97,29 @@ export function VetReviewForm({
         <p className="text-sm text-neutral-600">
           Ask any follow-up. Every probe is logged with this review.
         </p>
-        <div className="mt-3 flex gap-2">
-          <input
-            className="input"
+        <div className="mt-3 flex flex-col gap-2">
+          <textarea
+            className="input min-h-24"
             placeholder="e.g. What differentials for acute forelimb lameness in a 3yo lab?"
             value={probeQ}
             onChange={(e) => setProbeQ(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              // Cmd/Ctrl+Enter submits; plain Enter inserts a newline.
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
                 probe();
               }
             }}
           />
-          <button
-            className="btn-secondary shrink-0"
-            onClick={probe}
-            disabled={probing}
-          >
-            {probing ? "..." : "Ask"}
-          </button>
+          <div className="flex justify-end">
+            <button
+              className="btn-secondary shrink-0"
+              onClick={probe}
+              disabled={probing || !probeQ.trim()}
+            >
+              {probing ? "..." : "Ask"}
+            </button>
+          </div>
         </div>
         <ul className="mt-4 space-y-3">
           {probeLog.map((row, i) => (
