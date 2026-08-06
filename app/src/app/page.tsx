@@ -59,7 +59,7 @@ export default async function Home() {
                 Get a real vet when you need one.
               </span>
             </h1>
-            <p className="mt-5 max-w-2xl text-lg text-[color:var(--muted)]">
+            <p className="mt-5 text-lg text-[color:var(--muted)]">
               Ask a real question about your pet and get instant AI guidance.
               A <span className="whitespace-nowrap">California-licensed</span>{" "}
               veterinarian is one click away to review it or meet you on a
