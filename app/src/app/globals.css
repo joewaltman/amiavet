@@ -121,6 +121,34 @@ body {
 .tier-tag-ai { color: var(--terracotta); background: var(--terracotta-soft); }
 .tier-tag-vet { color: var(--green-dark); background: var(--green-soft); }
 
+/* Chip: tap-to-answer follow-up options + topic quick-starts. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink);
+  background: white;
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms, color 120ms;
+}
+.chip:hover { background: var(--green-soft); }
+.chip[aria-pressed="true"],
+.chip.chip-selected {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: white;
+}
+.chip.chip-skip { color: var(--muted); font-style: italic; }
+.chip.chip-skip.chip-selected,
+.chip.chip-skip[aria-pressed="true"] {
+  color: white;
+}
+
 /* Subtle radial-gradient wash behind the hero. */
 .hero-bg {
   position: relative;

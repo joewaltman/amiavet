@@ -1,6 +1,7 @@
 // Server-only Anthropic client. Every call writes an AiLog row.
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
+import type { ZodType } from "zod";
 import { prisma } from "@/lib/db";
 import { SYSTEM_PROMPT } from "@/lib/ai/systemPrompt";
 
@@ -9,11 +10,11 @@ import { SYSTEM_PROMPT } from "@/lib/ai/systemPrompt";
 // nuance matters). ANTHROPIC_MODEL is kept as a fallback so a single-model
 // deploy still works.
 const FALLBACK_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-haiku-4-5";
-const OWNER_MODEL = process.env.ANTHROPIC_MODEL_OWNER ?? FALLBACK_MODEL;
-const VET_MODEL = process.env.ANTHROPIC_MODEL_VET ?? FALLBACK_MODEL;
+export const OWNER_MODEL = process.env.ANTHROPIC_MODEL_OWNER ?? FALLBACK_MODEL;
+export const VET_MODEL = process.env.ANTHROPIC_MODEL_VET ?? FALLBACK_MODEL;
 
 let _client: Anthropic | null = null;
-function client() {
+export function anthropicClient() {
   if (_client) return _client;
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
@@ -21,62 +22,94 @@ function client() {
   return _client;
 }
 
-export type AiAnswer = {
-  emergency: boolean;
-  urgency: "emergency" | "same-day" | "routine" | "info";
-  needsFollowup: boolean;
-  followupQuestion: string | null;
-  answer: string;
-  summary: string;
-};
-
-// Build the user turn for the model: pet context (if any) + the question.
-function buildUserMessage(question: string, petContext: string): string {
-  const ctx = petContext.trim()
-    ? `<pet_context>\n${petContext.trim()}\n</pet_context>\n\n`
-    : "";
-  return `${ctx}<owner_question>\n${question.trim()}\n</owner_question>`;
-}
-
-// Draft an owner-facing answer.
-export async function generateAnswer(opts: {
-  consultId: string;
-  question: string;
-  petContext: string;
-}): Promise<AiAnswer> {
-  const userMessage = buildUserMessage(opts.question, opts.petContext);
+// -------------------------------------------------------------------
+// callAnthropicJson
+//
+// Shared helper for calls that expect a JSON object back. Handles:
+//   * SDK call + latency + AiLog write
+//   * "assistant: {" bias trick, since @anthropic-ai/sdk@0.115.0 has no
+//     hard JSON mode parameter
+//   * strict schema validation
+//
+// Returns { data, raw } — raw is included for callers that want to log
+// it or use it as a fallback.
+// -------------------------------------------------------------------
+export async function callAnthropicJson<T>(opts: {
+  model: string;
+  systemPrompt: string;
+  userPrompt: string;
+  maxTokens: number;
+  schema: ZodType<T>;
+  kind: string;
+  consultId?: string | null;
+  vetReviewId?: string | null;
+}): Promise<{ data: T; raw: string }> {
   const start = Date.now();
-  const resp = await client().messages.create({
-    model: OWNER_MODEL,
-    max_tokens: 1500,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
+  const resp = await anthropicClient().messages.create({
+    model: opts.model,
+    max_tokens: opts.maxTokens,
+    system: opts.systemPrompt,
+    messages: [
+      { role: "user", content: opts.userPrompt },
+      // Bias the model toward pure JSON by pre-filling the assistant turn
+      // with an opening brace. We prepend it back to the response before
+      // parsing.
+      { role: "assistant", content: "{" },
+    ],
   });
   const latencyMs = Date.now() - start;
 
-  const raw = resp.content
+  const body = resp.content
     .filter((c) => c.type === "text")
     .map((c) => (c as { text: string }).text)
-    .join("\n")
+    .join("")
     .trim();
-
-  const parsed = safeParseJson(raw);
+  // We pre-filled the assistant turn with "{" so the SDK response is the
+  // continuation from that character. Stitch it back on unless the model
+  // happened to echo it (rare, but harmless to guard against).
+  const raw = body.startsWith("{") ? body : "{" + body;
 
   await prisma.aiLog.create({
     data: {
-      consultId: opts.consultId,
-      model: OWNER_MODEL,
-      systemPrompt: SYSTEM_PROMPT,
-      userPrompt: userMessage,
+      consultId: opts.consultId ?? null,
+      vetReviewId: opts.vetReviewId ?? null,
+      model: opts.model,
+      systemPrompt: opts.systemPrompt,
+      userPrompt: opts.userPrompt,
       response: raw,
       inputTokens: resp.usage?.input_tokens ?? null,
       outputTokens: resp.usage?.output_tokens ?? null,
       latencyMs,
-      kind: "owner_ask",
+      kind: opts.kind,
     },
   });
 
-  return parsed;
+  const parsed = tryParseJsonObject(raw);
+  const validated = opts.schema.parse(parsed);
+  return { data: validated, raw };
+}
+
+// Extract the first {...} block and JSON.parse it. Throws on failure —
+// callers should catch and either retry or fall back.
+function tryParseJsonObject(raw: string): unknown {
+  try {
+    return JSON.parse(raw);
+  } catch {}
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (match) return JSON.parse(match[0]);
+  throw new Error("no JSON object in response");
+}
+
+// Build the user turn for a vet probe: pet context + question + prior answer.
+function buildVetProbeMessage(
+  question: string,
+  petContext: string,
+  priorAnswer: string
+): string {
+  const ctx = petContext.trim()
+    ? `<pet_context>\n${petContext.trim()}\n</pet_context>\n\n`
+    : "";
+  return `${ctx}<owner_question>\n${question.trim()}\n</owner_question>\n\n<prior_ai_answer>\n${priorAnswer}\n</prior_ai_answer>`;
 }
 
 // Vet-side probe. Free-form Q → A, logged against the vet review.
@@ -88,10 +121,14 @@ export async function vetProbe(opts: {
   priorAnswer: string;
 }): Promise<string> {
   const sys = `${SYSTEM_PROMPT}\n\nYou are now answering a licensed veterinarian's follow-up question while they review a prior AI answer. Be more technical. Cite differentials by name. Still refuse to prescribe.`;
-  const userMessage = `${buildUserMessage(opts.question, opts.petContext)}\n\n<prior_ai_answer>\n${opts.priorAnswer}\n</prior_ai_answer>`;
+  const userMessage = buildVetProbeMessage(
+    opts.question,
+    opts.petContext,
+    opts.priorAnswer
+  );
 
   const start = Date.now();
-  const resp = await client().messages.create({
+  const resp = await anthropicClient().messages.create({
     model: VET_MODEL,
     max_tokens: 1500,
     system: sys,
@@ -120,42 +157,4 @@ export async function vetProbe(opts: {
   });
 
   return raw;
-}
-
-// Best-effort JSON parse. If the model returns markdown with a code fence
-// or extra prose, extract the first {...} block and try that.
-function safeParseJson(raw: string): AiAnswer {
-  const fallback: AiAnswer = {
-    emergency: false,
-    urgency: "info",
-    needsFollowup: false,
-    followupQuestion: null,
-    answer: raw,
-    summary: raw.slice(0, 240),
-  };
-  try {
-    return coerce(JSON.parse(raw));
-  } catch {}
-  const match = raw.match(/\{[\s\S]*\}/);
-  if (match) {
-    try {
-      return coerce(JSON.parse(match[0]));
-    } catch {}
-  }
-  return fallback;
-}
-
-function coerce(o: unknown): AiAnswer {
-  const x = o as Record<string, unknown>;
-  const urgency = (x.urgency as AiAnswer["urgency"]) ?? "info";
-  return {
-    emergency: Boolean(x.emergency),
-    urgency: ["emergency", "same-day", "routine", "info"].includes(urgency)
-      ? urgency
-      : "info",
-    needsFollowup: Boolean(x.needsFollowup),
-    followupQuestion: (x.followupQuestion as string | null) ?? null,
-    answer: String(x.answer ?? ""),
-    summary: String(x.summary ?? ""),
-  };
 }

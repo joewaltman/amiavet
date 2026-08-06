@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { requireVet } from "@/lib/roles";
 import { prisma } from "@/lib/db";
-import { buildPetContext } from "@/lib/ai/history";
+import { buildPetContext } from "@/lib/ai/petContext";
 import { VetReviewForm } from "@/components/vet-review-form";
 
 // Full-context view for the vet. Shows the question, AI answer, pet profile,
@@ -51,7 +51,7 @@ export default async function VetConsultPage({
 
         <section className="card">
           <div className="text-xs uppercase tracking-wide text-neutral-500">
-            AI answer{consult.aiUrgency ? ` · ${consult.aiUrgency}` : ""}
+            AI answer{consult.urgency ? ` · ${consult.urgency}` : ""}
           </div>
           <div className="mt-2 whitespace-pre-wrap text-ink">
             {consult.aiAnswer ?? "(no AI answer captured)"}

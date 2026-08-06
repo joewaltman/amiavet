@@ -5,7 +5,7 @@ import { z } from "zod";
 import { requireVet } from "@/lib/roles";
 import { prisma } from "@/lib/db";
 import { vetProbe } from "@/lib/ai/anthropic";
-import { buildPetContext } from "@/lib/ai/history";
+import { buildPetContext } from "@/lib/ai/petContext";
 
 const Body = z.object({
   consultId: z.string().min(1),

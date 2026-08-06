@@ -2,15 +2,17 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getDraft } from "@/lib/draft";
+import { getDraft, hasSaveIntent } from "@/lib/draft";
 
 export default async function DashboardPage() {
   const session = await auth();
   const userId = (session!.user as { id: string }).id;
 
-  // If a draft question was captured pre-auth, hand it off to the Route
-  // Handler that can safely clear the cookie and create the consult.
-  // Server Components can read cookies but not modify them.
+  // Post-login replay of a stashed two-stage session takes precedence.
+  if (await hasSaveIntent()) {
+    redirect("/api/consults/complete-save");
+  }
+  // Legacy: a bare-question draft from the pre-two-stage AskBox.
   const draft = await getDraft();
   if (draft?.question) {
     redirect("/api/complete-draft");

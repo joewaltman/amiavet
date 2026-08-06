@@ -1,15 +1,33 @@
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { AskBox } from "@/components/ask-box";
+import { AskFlow } from "@/components/ask-flow";
 import { HowItWorks } from "@/components/how-it-works";
 import { Pricing } from "@/components/pricing";
 import { TrustBand } from "@/components/trust-band";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 
-// Public home page. Same page for anonymous and signed-in visitors: the
-// AskBox is the primary CTA at the top, followed by explanatory sections.
-// The AskBox POST flow already handles the anonymous -> /login -> /dashboard
-// hand-off via a signed cookie draft.
-export default function Home() {
+// Public home page. Same page for anonymous and signed-in visitors.
+// AskFlow drives the two-stage triage → answer flow inline (no page
+// navigation). Anon users get the full experience; the flow only asks
+// for auth if they choose to persist (save, review, or video visit).
+export default async function Home() {
+  const session = await auth();
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+
+  const pets = userId
+    ? await prisma.pet.findMany({
+        where: { ownerId: userId },
+        orderBy: { createdAt: "asc" },
+        select: { id: true, name: true, species: true },
+      })
+    : [];
+  const askFlowPets = pets.map((p) => ({
+    id: p.id,
+    name: p.name,
+    species: p.species,
+  }));
+
   return (
     <>
       <a className="skip-link" href="#ask">
@@ -17,7 +35,7 @@ export default function Home() {
       </a>
       <SiteHeader />
       <main id="main" className="flex-1">
-        {/* Hero + AskBox */}
+        {/* Hero + AskFlow */}
         <section className="hero-bg" aria-labelledby="hero-title">
           <div className="wrap max-w-3xl pt-16 pb-14 sm:pt-20">
             <span className="eyebrow">A new kind of pet care</span>
@@ -37,7 +55,7 @@ export default function Home() {
             </p>
 
             <div className="mt-8">
-              <AskBox />
+              <AskFlow initialPets={askFlowPets} isAuthed={!!userId} />
             </div>
 
             <p className="mt-4 text-sm text-[color:var(--muted)]">

@@ -147,7 +147,7 @@ model Consult {
   // Optional follow-up Q/A pairs captured before finalizing (JSON array).
   followups      Json?
   aiAnswer       String?       @db.Text
-  aiUrgency      String?       // "emergency" | "same-day" | "routine" | "info"
+  urgency        String?       // "info" | "monitor" | "see_vet" | "urgent"
   aiSummary      String?       @db.Text // short summary the vet sees
 
   // Flag set by the AI if the prompt suggests a red-flag emergency.
@@ -161,11 +161,34 @@ model Consult {
 
   payments       Payment[]
   aiLogs         AiLog[]
+  messages       ConsultMessage[]
   vetReview      VetReview?
   videoBooking   VideoBooking?
 
   @@index([ownerId, createdAt])
   @@index([status])
+}
+
+// Turn-by-turn transcript for the two-stage triage → answer flow.
+// Owner rows capture the free text; system rows capture the structured
+// triage intake + follow-up answers; ai rows capture the final answer.
+enum ConsultMessageRole {
+  owner
+  system
+  ai
+}
+
+model ConsultMessage {
+  id        String              @id @default(cuid())
+  consultId String
+  role      ConsultMessageRole
+  content   String              @db.Text
+  metadata  Json?
+  createdAt DateTime            @default(now())
+
+  consult   Consult @relation(fields: [consultId], references: [id], onDelete: Cascade)
+
+  @@index([consultId, createdAt])
 }
 
 // Full audit row for every Anthropic call (owner-side or vet-probe).
