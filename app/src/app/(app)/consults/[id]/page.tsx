@@ -182,7 +182,11 @@ export default async function ConsultPage({
           {!paidVideo ? <BookVideoButton consultId={consult.id} /> : null}
         </div>
         {consult.videoBooking ? (
-          <div className="mt-4 text-sm">
+          <div className="mt-4 space-y-2 text-sm">
+            <p className="text-neutral-600">
+              This is a 15-minute visit focused on the question you submitted.
+              Your vet can help you book more time if needed.
+            </p>
             <a
               className="text-sage underline"
               href={appendConsultMetadata(

@@ -605,15 +605,21 @@ function AnsweredStage(props: {
               ? "Loading…"
               : "Have a licensed vet review this · $20"}
           </button>
-          <button
-            className="btn-terracotta"
-            onClick={() => goPaid("video")}
-            disabled={busy !== null}
-          >
-            {busy === "video"
-              ? "Loading…"
-              : "Book a 15-minute video visit · $40"}
-          </button>
+          <div className="flex flex-col gap-1">
+            <button
+              className="btn-terracotta"
+              onClick={() => goPaid("video")}
+              disabled={busy !== null}
+            >
+              {busy === "video"
+                ? "Loading…"
+                : "Book a 15-minute video visit · $40"}
+            </button>
+            <p className="text-xs text-[color:var(--muted)]">
+              A focused 15-minute call about this question. Need more time?
+              Your vet can help you book another 15 minutes ($40).
+            </p>
+          </div>
           <button
             type="button"
             className="btn-secondary"
