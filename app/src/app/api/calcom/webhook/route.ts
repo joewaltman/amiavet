@@ -13,6 +13,8 @@ import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/db";
 import { trackServer } from "@/lib/analytics-server";
+import { generateAndStorePrepNote } from "@/lib/ai/prepNotePrompt";
+import { sendVetPrepNoteEmail } from "@/lib/email/resend";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,6 +48,10 @@ export async function POST(req: Request) {
     payload?: {
       metadata?: { consultId?: string };
       startTime?: string;
+      // Cal.com includes the assigned host under organizer for
+      // round-robin bookings. We only use organizer.email to route the
+      // notification; we do NOT rely on any other host field.
+      organizer?: { email?: string; name?: string };
     };
   };
   try {
@@ -98,5 +104,76 @@ export async function POST(req: Request) {
     amountCents: payment.amountCents,
   });
 
+  // Generate the prep note + notify the vet. Both steps are best-effort:
+  // a failure here must not cause Cal.com to retry the booking-paid
+  // event, since the payment + scheduledAt state above is already
+  // committed and any retry would double-track and double-email.
+  try {
+    await notifyVetOfVideoBooking({
+      consultId,
+      scheduledAt: startTime && !Number.isNaN(startTime.getTime()) ? startTime : null,
+      organizerEmail: event.payload?.organizer?.email ?? null,
+    });
+  } catch (err) {
+    console.warn("cal.com webhook: prep-note / vet email failed:", err);
+  }
+
   return NextResponse.json({ ok: true });
+}
+
+// Resolve the vet recipient, refresh the prep note, and send the email.
+// Recipient rules:
+//   1. If Cal.com passes an organizer email that matches a User with
+//      role=vet, send to that vet.
+//   2. Otherwise fall back to the VET_NOTIFICATION_EMAIL pool address.
+//   3. If neither is configured, skip the email but still generate the
+//      prep note (it's visible on the vet dashboard).
+async function notifyVetOfVideoBooking(opts: {
+  consultId: string;
+  scheduledAt: Date | null;
+  organizerEmail: string | null;
+}) {
+  const prepNote = await generateAndStorePrepNote(opts.consultId);
+
+  const consult = await prisma.consult.findUnique({
+    where: { id: opts.consultId },
+    include: { pet: true },
+  });
+  if (!consult) return;
+
+  let recipient: string | null = null;
+  if (opts.organizerEmail) {
+    const vet = await prisma.user.findFirst({
+      where: { email: opts.organizerEmail, role: { in: ["vet", "admin"] } },
+      select: { email: true },
+    });
+    if (vet?.email) recipient = vet.email;
+  }
+  if (!recipient) {
+    recipient = process.env.VET_NOTIFICATION_EMAIL ?? null;
+  }
+  if (!recipient) {
+    console.warn(
+      "cal.com webhook: no vet recipient (no matching organizer, no VET_NOTIFICATION_EMAIL)"
+    );
+    return;
+  }
+
+  const petLabel = consult.pet
+    ? `${consult.pet.name} (${consult.pet.species}${
+        consult.pet.birthDate
+          ? `, born ${consult.pet.birthDate.toISOString().slice(0, 10)}`
+          : ""
+      })`
+    : "no pet on file";
+
+  await sendVetPrepNoteEmail({
+    to: recipient,
+    consultId: opts.consultId,
+    scheduledAt: opts.scheduledAt,
+    petLabel,
+    ownerQuestion: consult.question,
+    prepNote,
+    urgency: consult.urgency,
+  });
 }

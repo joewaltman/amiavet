@@ -22,6 +22,7 @@ export default async function VetConsultPage({
       pet: true,
       owner: true,
       vetReview: true,
+      videoBooking: true,
       aiLogs: { orderBy: { createdAt: "asc" } },
     },
   });
@@ -38,6 +39,47 @@ export default async function VetConsultPage({
           ← Back to queue
         </Link>
       </div>
+
+      {consult.videoBooking ? (
+        <section className="card border-l-4 border-sage">
+          <div className="text-xs uppercase tracking-wide text-neutral-500">
+            Scheduled video visit
+          </div>
+          <div className="mt-1 text-ink">
+            {consult.videoBooking.scheduledAt
+              ? consult.videoBooking.scheduledAt.toLocaleString()
+              : "Awaiting scheduled time"}
+          </div>
+          {consult.videoBooking.bookingUrl ? (
+            <a
+              className="mt-2 inline-block text-sm text-sage underline"
+              href={consult.videoBooking.bookingUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open join link →
+            </a>
+          ) : null}
+        </section>
+      ) : null}
+
+      {consult.vetPrepNote ? (
+        <section className="card bg-amber-50">
+          <div className="flex items-baseline justify-between">
+            <div className="text-xs uppercase tracking-wide text-neutral-500">
+              Prep note
+            </div>
+            {consult.vetPrepNoteAt ? (
+              <div className="text-xs text-neutral-500">
+                Generated {consult.vetPrepNoteAt.toLocaleString()}
+              </div>
+            ) : null}
+          </div>
+          <div className="mt-2 whitespace-pre-wrap text-sm text-ink">
+            {consult.vetPrepNote}
+          </div>
+        </section>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="card">

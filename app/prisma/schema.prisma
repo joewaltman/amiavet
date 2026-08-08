@@ -162,6 +162,12 @@ model Consult {
   // Flag set by the AI if the prompt suggests a red-flag emergency.
   emergencyFlag  Boolean       @default(false)
 
+  // Short (3-4 line) internal summary generated for the vet when a
+  // review is requested or a video visit is booked. Convenience
+  // snapshot only — the messages/AI logs remain the source of truth.
+  vetPrepNote    String?       @db.Text
+  vetPrepNoteAt  DateTime?
+
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 

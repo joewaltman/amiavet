@@ -6,6 +6,7 @@ import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import { trackServer } from "@/lib/analytics-server";
+import { generateAndStorePrepNote } from "@/lib/ai/prepNotePrompt";
 
 // Stripe needs the raw body to verify the signature.
 export const runtime = "nodejs";
@@ -98,5 +99,14 @@ async function handleCheckoutCompleted(cs: Stripe.Checkout.Session) {
       tier: "review",
       amountCents: payment.amountCents,
     });
+    // Best-effort prep note so the vet queue shows context the moment
+    // the review lands. Video visits generate/refresh it again from
+    // the Cal.com webhook. Any failure is logged but must not fail the
+    // webhook — Stripe will retry, which would re-process the payment.
+    try {
+      await generateAndStorePrepNote(payment.consultId);
+    } catch (err) {
+      console.warn("stripe webhook: prep-note generation failed:", err);
+    }
   }
 }
