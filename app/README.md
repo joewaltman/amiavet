@@ -52,6 +52,9 @@ all of them.
 - `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (`claude-haiku-4-5` while iterating).
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_REVIEW`, `STRIPE_PRICE_VIDEO`.
 - `VIDEO_BOOKING_URL` — Cal.com / Calendly link.
+- `POSTERNA_SITE_KEY` — optional. Site key from the Posterna dashboard; without it Posterna's aggregate counts stay on the server.
+- `POSTERNA_DEBUG_TOKEN` — optional and temporary. Turns on `/.well-known/posterna/debug` for `posterna doctor`; remove it afterwards.
+- `POSTERNA_MODE` — optional. `monitor` forces monitor mode whatever `agents.yaml` says.
 
 ---
 
@@ -113,6 +116,8 @@ all of them.
 - `src/app/api/stripe/webhook/route.ts` — flips Payment + Consult on success.
 - `src/app/api/vet/probe/route.ts` — vet AI probes.
 - `src/app/api/vet/verdict/route.ts` — persists verdict + notifies owner.
+- `src/proxy.ts` + `agents.yaml` — Posterna agent and crawler labels (monitor mode only; never blocks).
+- `vendor/posterna/` — Posterna packages as tarballs until they are on npm.
 - `src/app/page.tsx` — public landing.
 - `src/app/(app)/dashboard/page.tsx` — owner dashboard (completes pending drafts).
 - `src/app/(app)/consults/[id]/page.tsx` — consult thread.
