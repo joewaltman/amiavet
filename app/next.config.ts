@@ -1,3 +1,4 @@
+import { withPosternaConfig } from "@posterna/next/config";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -23,4 +24,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Builds agents.yaml into the Posterna proxy at build time, so it never has to
+// read the file at run time.
+export default withPosternaConfig(nextConfig);
