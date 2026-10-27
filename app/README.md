@@ -117,7 +117,6 @@ all of them.
 - `src/app/api/vet/probe/route.ts` — vet AI probes.
 - `src/app/api/vet/verdict/route.ts` — persists verdict + notifies owner.
 - `src/proxy.ts` + `agents.yaml` — Posterna agent and crawler labels (monitor mode only; never blocks).
-- `vendor/posterna/` — Posterna packages as tarballs until they are on npm.
 - `src/app/page.tsx` — public landing.
 - `src/app/(app)/dashboard/page.tsx` — owner dashboard (completes pending drafts).
 - `src/app/(app)/consults/[id]/page.tsx` — consult thread.
